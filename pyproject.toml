@@ -3,7 +3,7 @@ requires = ["uv_build>=0.4,<1"]
 build-backend = "uv_build"
 
 [project]
-name = "ebf-trading-ui"
+name = "ebf-ui"
 version = "0.1.0"
 description = "Trading-specific UI components and views"
 readme = "README.md"
