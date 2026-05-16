@@ -1,3 +1,3 @@
-# EbfTradingUI
+# EbfUI
 
-Trading-specific UI components and views.
+UI foundational components

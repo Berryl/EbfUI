@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "ebf-ui"
 version = "0.1.0"
-description = "Trading-specific UI components and views"
+description = "UI foundational components"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{ name = "EBF" }]
@@ -14,7 +14,6 @@ license = { text = "MIT" }
 dependencies = [
     "ebf-core",
     "ebf-domain",
-    "ebf-ui",
 ]
 
 [project.optional-dependencies]
@@ -28,7 +27,6 @@ dev = [
 [tool.uv.sources]
 ebf-core = { path = "../EbfUtil", editable = true }
 ebf-domain = { path = "../EbfDomain", editable = true }
-ebf-ui = { path = "../EbfUI", editable = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
