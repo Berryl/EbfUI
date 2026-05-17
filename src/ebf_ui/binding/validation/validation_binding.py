@@ -11,7 +11,7 @@ class ValidationViolation(Protocol):
     def ui_error_message(self) -> str: ...
 
 
-class ValidationResultLike(Protocol):
+class ValidationState(Protocol):
     @property
     def is_valid(self) -> bool: ...
 
@@ -23,9 +23,9 @@ class ValidationResultLike(Protocol):
 
 
 class ValidationBinding:
-    def __init__(self, validate: Callable[[], ValidationResultLike]):
+    def __init__(self, validate: Callable[[], ValidationState]):
         self.validate = validate
-        self.result: ValidationResultLike | None = None
+        self.result: ValidationState | None = None
 
     @property
     def is_valid(self) -> bool:

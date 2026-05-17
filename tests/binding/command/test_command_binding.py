@@ -7,6 +7,11 @@ from ebf_ui.state.state_tracker import StateTracker
 
 
 class TestCommandBinding:
+
+    @pytest.fixture
+    def tracker(self) -> StateTracker:
+        return StateTracker(SimpleNamespace(name="original"))
+
     @pytest.fixture
     def to_execute(self):
         def _execute():
@@ -17,8 +22,7 @@ class TestCommandBinding:
     class TestIsEnabled:
         class TestWhenDisabled:
 
-            def test_when_not_editing(self, to_execute):
-                tracker = StateTracker(SimpleNamespace(name="original"))
+            def test_when_not_editing(self, tracker, to_execute):
                 validation = SimpleNamespace(is_valid=True)
 
                 sut = CommandBinding(tracker, validation, to_execute)
@@ -26,8 +30,7 @@ class TestCommandBinding:
 
                 assert not sut.is_enabled
 
-            def test_when_editing_but_not_dirty(self, to_execute):
-                tracker = StateTracker(SimpleNamespace(name="original"))
+            def test_when_editing_but_not_dirty(self, tracker, to_execute):
                 validation = SimpleNamespace(is_valid=True)
                 sut = CommandBinding(tracker, validation, to_execute)
 
@@ -38,8 +41,7 @@ class TestCommandBinding:
 
                 assert not sut.is_enabled
 
-            def test_dirty_but_not_valid(self, to_execute):
-                tracker = StateTracker(SimpleNamespace(name="original"))
+            def test_dirty_but_not_valid(self, tracker, to_execute):
                 validation = SimpleNamespace(is_valid=False)
                 sut = CommandBinding(tracker, validation, to_execute)
 
@@ -53,8 +55,7 @@ class TestCommandBinding:
                 assert not sut.is_enabled
 
         class TestWhenEnabled:
-            def test_dirty_and_valid(self, to_execute):
-                tracker = StateTracker(SimpleNamespace(name="original"))
+            def test_dirty_and_valid(self, tracker, to_execute):
                 validation = SimpleNamespace(is_valid=True)
                 sut = CommandBinding(tracker, validation, to_execute)
 
@@ -68,8 +69,7 @@ class TestCommandBinding:
                 assert sut.is_enabled
 
     class TestStateTrackerEvents:
-        def test_notifies_when_enabled_changes(self, to_execute):
-            tracker = StateTracker(SimpleNamespace(name="original"))
+        def test_notifies_when_enabled_changes(self, tracker, to_execute):
             validation = SimpleNamespace(is_valid=True)
             sut = CommandBinding(tracker, validation, to_execute)
             received = []

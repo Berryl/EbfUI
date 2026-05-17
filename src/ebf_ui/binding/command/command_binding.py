@@ -1,6 +1,7 @@
 from enum import StrEnum, auto
 from typing import Callable
 
+from ebf_ui.binding.validation.validation_binding import ValidationState
 from ebf_ui.state.state_tracker import StateTracker
 
 
@@ -12,7 +13,7 @@ type CommandBindingListener = Callable[[CommandBindingEvent], None]
 
 
 class CommandBinding:
-    def __init__(self, tracker: StateTracker, validation, execute: Callable[[], None]):
+    def __init__(self, tracker: StateTracker, validation: ValidationState, execute: Callable[[], None]):
         self.tracker = tracker
         self.validation = validation
         self._execute = execute
