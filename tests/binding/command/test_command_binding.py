@@ -13,7 +13,7 @@ class TestCommandBinding:
                 validation = SimpleNamespace(is_valid=True)
 
                 sut = CommandBinding(tracker, validation)
-                assert tracker.is_editing == False
+                assert not tracker.is_editing
 
                 assert not sut.is_enabled
 
