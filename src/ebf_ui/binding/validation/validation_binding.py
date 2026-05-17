@@ -1,7 +1,11 @@
-from typing import Any, Callable
+from typing import Callable
 from typing import Protocol
 
+from ebf_ui.state.state_events import StateTrackerEvent
+from ebf_ui.state.state_tracker import StateTracker
 
+
+# region protocols
 class ValidationViolation(Protocol):
     @property
     def ui_error_message(self) -> str: ...
@@ -15,6 +19,9 @@ class ValidationResultLike(Protocol):
     def violations(self) -> list[ValidationViolation]: ...
 
 
+# endregion
+
+
 class ValidationBinding:
     def __init__(self, validate: Callable[[], ValidationResultLike]):
         self.validate = validate
@@ -25,7 +32,7 @@ class ValidationBinding:
         return self.result is not None and self.result.is_valid
 
     @property
-    def violations(self) -> list[Any]:
+    def violations(self) -> list[ValidationViolation]:
         if self.result is None:
             return []
         return list(self.result.violations)
@@ -36,3 +43,11 @@ class ValidationBinding:
 
     def update(self) -> None:
         self.result = self.validate()
+
+
+def bind_validation(tracker: StateTracker, validation: ValidationBinding) -> None:
+    def listener(event: StateTrackerEvent) -> None:
+        if event in {StateTrackerEvent.BEGIN_EDIT, StateTrackerEvent.UPDATE_EDIT}:
+            validation.update()
+
+    tracker.listeners.append(listener)

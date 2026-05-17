@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from types import SimpleNamespace
 
-from ebf_ui.binding.validation.validation_binding import ValidationBinding
+from ebf_ui.binding.validation.validation_binding import ValidationBinding, bind_validation
+from ebf_ui.state.state_tracker import StateTracker
 
 
 @dataclass
@@ -31,3 +33,20 @@ class TestValidationBinding:
         assert not binding.is_valid
         assert binding.violations == []
         assert binding.ui_error_messages == []
+
+    def test_bind_validation_updates_validation_on_begin_and_update(self):
+        calls = []
+
+        class FakeValidation:
+            @staticmethod
+            def update():
+                calls.append("updated")
+
+        tracker = StateTracker(SimpleNamespace(name="original"))
+        bind_validation(tracker, FakeValidation())
+
+        tracker.begin_edit()
+        tracker.instance.name = "updated"
+        tracker.update_edit()
+
+        assert calls == ["updated", "updated"]
