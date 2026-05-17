@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from ebf_ui.binding.command.command_binding import CommandBinding
+from ebf_ui.binding.command.command_binding import CommandBinding, CommandBindingEvent
 from ebf_ui.state.state_tracker import StateTracker
 
 
@@ -57,3 +57,25 @@ class TestCommandBinding:
                 assert validation.is_valid
 
                 assert sut.is_enabled
+
+    class TestStateTrackerEvents:
+        def test_notifies_when_enabled_changes(self):
+            tracker = StateTracker(SimpleNamespace(name="original"))
+            validation = SimpleNamespace(is_valid=True)
+            sut = CommandBinding(tracker, validation)
+            received = []
+
+            sut.listeners.append(received.append)
+
+            tracker.begin_edit()
+
+            tracker.instance.name = "updated"
+            tracker.update_edit()
+
+            tracker.instance.name = "original"
+            tracker.update_edit()
+
+            assert received == [
+                CommandBindingEvent.ENABLED_CHANGED,
+                CommandBindingEvent.ENABLED_CHANGED,
+            ]
