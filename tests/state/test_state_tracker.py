@@ -8,13 +8,16 @@ class MyClass:
     def __init__(self):
         self.name = "original"
 
+
 @pytest.fixture
 def obj() -> MyClass:
     return MyClass()
 
+
 @pytest.fixture
 def sut(obj) -> StateTracker:
     return StateTracker(obj)
+
 
 class TestStateTracker:
 
@@ -149,7 +152,7 @@ class TestStateTracker:
 
             assert received == [StateTrackerEvent.BEGIN_EDIT]
 
-        def test_update_edit(self, sut: StateTracker, obj: MyClass):
+        def test_update_edit_notifies_dirty_changed_when_dirty_state_changes(self, sut: StateTracker, obj: MyClass):
             received = []
             sut.listeners.append(received.append)
 
@@ -159,6 +162,45 @@ class TestStateTracker:
 
             assert received == [
                 StateTrackerEvent.BEGIN_EDIT,
+                StateTrackerEvent.DIRTY_CHANGED,
+                StateTrackerEvent.UPDATE_EDIT,
+            ]
+
+        def test_update_edit_does_not_notify_dirty_changed_when_dirty_state_does_not_change(
+                self, sut: StateTracker, obj: MyClass
+        ):
+            received = []
+            sut.listeners.append(received.append)
+
+            sut.begin_edit()
+            obj.name = "updated"
+            sut.update_edit()
+            sut.update_edit()
+
+            assert received == [
+                StateTrackerEvent.BEGIN_EDIT,
+                StateTrackerEvent.DIRTY_CHANGED,
+                StateTrackerEvent.UPDATE_EDIT,
+                StateTrackerEvent.UPDATE_EDIT,
+            ]
+
+        def test_update_edit_notifies_dirty_changed_when_dirty_state_returns_to_clean(
+                self, sut: StateTracker, obj: MyClass
+        ):
+            received = []
+            sut.listeners.append(received.append)
+
+            sut.begin_edit()
+            obj.name = "updated"
+            sut.update_edit()
+            obj.name = "original"
+            sut.update_edit()
+
+            assert received == [
+                StateTrackerEvent.BEGIN_EDIT,
+                StateTrackerEvent.DIRTY_CHANGED,
+                StateTrackerEvent.UPDATE_EDIT,
+                StateTrackerEvent.DIRTY_CHANGED,
                 StateTrackerEvent.UPDATE_EDIT,
             ]
 

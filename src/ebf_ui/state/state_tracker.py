@@ -43,28 +43,34 @@ class StateTracker:
         if not self.is_editing:
             raise RuntimeError("update_edit called before begin_edit")
 
+        was_dirty = self.is_dirty
         self.current = self._capture()
+        if self.is_dirty != was_dirty:
+            self._notify(StateTrackerEvent.DIRTY_CHANGED)
         self._notify(StateTrackerEvent.UPDATE_EDIT)
 
     def end_edit(self) -> None:
-        self._reset("end")
+        self._ensure_editing("end")
+        self._reset()
         self._notify(StateTrackerEvent.END_EDIT)
 
     def cancel_edit(self) -> None:
-        self._reset("cancel")
+        self._ensure_editing("cancel")
+        self._reset()
         self._notify(StateTrackerEvent.CANCEL_EDIT)
 
     def _capture(self) -> dict[str, Any]:
         reflector = AttributeReflector(self.instance)
         return capture(reflector, self.attrs)
 
+    def _ensure_editing(self, action: str) -> None:
+        if not self.is_editing:
+            raise RuntimeError(f"{action}_edit called before begin_edit")
+
     def _notify(self, event: StateTrackerEvent) -> None:
         for listener in self.listeners:
             listener(event)
 
-    def _reset(self, action: str) -> None:
-        if not self.is_editing:
-            raise RuntimeError(f"{action}_edit called before begin_edit")
-
+    def _reset(self) -> None:
         self.original = None
         self.current = None
