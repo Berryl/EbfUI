@@ -35,7 +35,7 @@ class ValidationBinding:
     def violations(self) -> list[ValidationViolation]:
         if self.result is None:
             return []
-        return list(self.result.violations)
+        return self.result.violations
 
     @property
     def ui_error_messages(self) -> list[str]:

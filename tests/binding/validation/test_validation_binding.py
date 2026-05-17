@@ -34,19 +34,38 @@ class TestValidationBinding:
         assert binding.violations == []
         assert binding.ui_error_messages == []
 
-    def test_bind_validation_updates_validation_on_begin_and_update(self):
-        calls = []
+    class TestStateTrackerEvents:
 
-        class FakeValidation:
-            @staticmethod
-            def update():
-                calls.append("updated")
+        def test_begin_edit_triggers_update(self):
+            calls = []
 
-        tracker = StateTracker(SimpleNamespace(name="original"))
-        bind_validation(tracker, FakeValidation())
+            class FakeValidation:
+                @staticmethod
+                def update():
+                    calls.append("updated")
 
-        tracker.begin_edit()
-        tracker.instance.name = "updated"
-        tracker.update_edit()
+            tracker = StateTracker(SimpleNamespace(name="original"))
+            bind_validation(tracker, FakeValidation())
 
-        assert calls == ["updated", "updated"]
+            tracker.begin_edit()
+
+            assert calls == ["updated"]
+
+        def test_update_edit_triggers_update(self):
+            calls = []
+
+            class FakeValidation:
+                @staticmethod
+                def update():
+                    calls.append("updated")
+
+            tracker = StateTracker(SimpleNamespace(name="original"))
+            bind_validation(tracker, FakeValidation())
+
+            tracker.begin_edit()
+            calls.clear()
+
+            tracker.instance.name = "updated"
+            tracker.update_edit()
+
+            assert calls == ["updated"]

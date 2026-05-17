@@ -12,27 +12,20 @@ class TestCommandBinding:
     def tracker(self) -> StateTracker:
         return StateTracker(SimpleNamespace(name="original"))
 
-    @pytest.fixture
-    def to_execute(self):
-        def _execute():
-            pass
-
-        return _execute
-
     class TestIsEnabled:
         class TestWhenDisabled:
 
-            def test_when_not_editing(self, tracker, to_execute):
+            def test_when_not_editing(self, tracker):
                 validation = SimpleNamespace(is_valid=True)
 
-                sut = CommandBinding(tracker, validation, to_execute)
+                sut = CommandBinding(tracker, validation, lambda: None)
                 assert not tracker.is_editing
 
                 assert not sut.is_enabled
 
-            def test_when_editing_but_not_dirty(self, tracker, to_execute):
+            def test_when_editing_but_not_dirty(self, tracker):
                 validation = SimpleNamespace(is_valid=True)
-                sut = CommandBinding(tracker, validation, to_execute)
+                sut = CommandBinding(tracker, validation, lambda: None)
 
                 tracker.begin_edit()
 
@@ -41,9 +34,9 @@ class TestCommandBinding:
 
                 assert not sut.is_enabled
 
-            def test_dirty_but_not_valid(self, tracker, to_execute):
+            def test_dirty_but_not_valid(self, tracker):
                 validation = SimpleNamespace(is_valid=False)
-                sut = CommandBinding(tracker, validation, to_execute)
+                sut = CommandBinding(tracker, validation, lambda: None)
 
                 tracker.begin_edit()
                 tracker.instance.name = "updated"
@@ -55,9 +48,9 @@ class TestCommandBinding:
                 assert not sut.is_enabled
 
         class TestWhenEnabled:
-            def test_dirty_and_valid(self, tracker, to_execute):
+            def test_dirty_and_valid(self, tracker):
                 validation = SimpleNamespace(is_valid=True)
-                sut = CommandBinding(tracker, validation, to_execute)
+                sut = CommandBinding(tracker, validation, lambda: None)
 
                 tracker.begin_edit()
                 tracker.instance.name = "updated"
@@ -69,9 +62,9 @@ class TestCommandBinding:
                 assert sut.is_enabled
 
     class TestStateTrackerEvents:
-        def test_notifies_when_enabled_changes(self, tracker, to_execute):
+        def test_notifies_when_enabled_changes(self, tracker):
             validation = SimpleNamespace(is_valid=True)
-            sut = CommandBinding(tracker, validation, to_execute)
+            sut = CommandBinding(tracker, validation, lambda: None)
             received = []
 
             sut.listeners.append(received.append)
@@ -154,11 +147,11 @@ class TestCommandBinding:
                 CommandBindingEvent.EXECUTED,
             ]
 
-        def test_does_not_notify_when_disabled(self, tracker, to_execute):
+        def test_does_not_notify_when_disabled(self, tracker):
             validation = SimpleNamespace(is_valid=True)
             received = []
 
-            sut = CommandBinding(tracker, validation, to_execute)
+            sut = CommandBinding(tracker, validation, lambda: None)
             sut.listeners.append(received.append)
 
             sut.execute()
