@@ -5,4 +5,8 @@ class CommandBinding:
 
     @property
     def is_enabled(self) -> bool:
-        return False
+        return (
+                self.tracker.is_editing
+                and self.tracker.is_dirty
+                and self.validation.is_valid
+        )
