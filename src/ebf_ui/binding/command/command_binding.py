@@ -2,6 +2,7 @@ from enum import StrEnum, auto
 from typing import Callable
 
 from ebf_ui.binding.validation.validation_binding import ValidationState
+from ebf_ui.state.state_events import StateTrackerEvent
 from ebf_ui.state.state_tracker import StateTracker
 
 
@@ -36,7 +37,7 @@ class CommandBinding:
                 and self.validation.is_valid
         )
 
-    def _on_state_changed(self, event):
+    def _on_state_changed(self, _: StateTrackerEvent) -> None:
         was_enabled = self._was_enabled
         self._was_enabled = self.is_enabled
 
