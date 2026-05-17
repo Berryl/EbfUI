@@ -6,8 +6,9 @@ from ebf_ui.state.state_events import StateTrackerListener, StateTrackerEvent
 
 
 class StateTracker:
-    def __init__(self, instance: object):
+    def __init__(self, instance: object, requested_attrs: list[str] | None = None, exclusions: list[str] | None = None):
         self.instance = instance
+        self.attrs = select_attrs(instance, requested_attrs, exclusions)
         self.original: dict | None = None
         self.current: dict | None = None
         self.listeners: list[StateTrackerListener] = []
@@ -31,19 +32,25 @@ class StateTracker:
 
     def update_edit(self) -> None:
         self.current = self._capture()
+        self._notify(StateTrackerEvent.UPDATE_EDIT)
 
     def end_edit(self) -> None:
-        self.original = None
-        self.current = None
+        self._reset()
+        self._notify(StateTrackerEvent.END_EDIT)
 
     def cancel_edit(self) -> None:
-        self.end_edit()
+        self._reset()
+        self._notify(StateTrackerEvent.CANCEL_EDIT)
+
 
     def _capture(self) -> dict:
         reflector = AttributeReflector(self.instance)
-        attrs = select_attrs(self.instance)
-        return capture(reflector, attrs)
+        return capture(reflector, self.attrs)
 
     def _notify(self, event: StateTrackerEvent) -> None:
         for listener in self.listeners:
             listener(event)
+
+    def _reset(self) -> None:
+        self.original = None
+        self.current = None

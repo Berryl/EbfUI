@@ -53,7 +53,7 @@ class TestStateTracker:
             "name": ("original", "updated")
         }
 
-    def test_end_edit_clears_state(self, sut: StateTracker, obj: MyClass):
+    def test_end_edit_clears_state(self, sut: StateTracker):
         sut.begin_edit()
 
         sut.end_edit()
@@ -76,12 +76,72 @@ class TestStateTracker:
         assert not sut.is_dirty
         assert sut.changes == {}
 
-    class TestListeners:
-        def test_begin_edit_notifies_listeners(self, sut: StateTracker):
-            received = []
+    class TestRequestedAttrsAndExclusions:
+        def test_requested_attrs_limits_tracking_scope(self, obj: MyClass):
+            sut = StateTracker(obj, requested_attrs=["name"])
+            sut.begin_edit()
 
+            obj.name = "updated"
+            obj.extra = "ignored"
+            sut.update_edit()
+
+            assert sut.changes == {
+                "name": ("original", "updated")
+            }
+
+        def test_exclusions_remove_attrs_from_tracking_scope(self, obj: MyClass):
+            obj.value = 42
+            sut = StateTracker(obj, exclusions=["value"])
+            sut.begin_edit()
+
+            obj.value = 99
+            sut.update_edit()
+
+            assert not sut.is_dirty
+
+    class TestListeners:
+
+        def test_begin_edit(self, sut: StateTracker):
+            received = []
             sut.listeners.append(received.append)
 
             sut.begin_edit()
 
             assert received == [StateTrackerEvent.BEGIN_EDIT]
+
+        def test_update_edit(self, sut: StateTracker, obj: MyClass):
+            received = []
+            sut.listeners.append(received.append)
+
+            sut.begin_edit()
+            obj.name = "updated"
+            sut.update_edit()
+
+            assert received == [
+                StateTrackerEvent.BEGIN_EDIT,
+                StateTrackerEvent.UPDATE_EDIT,
+            ]
+
+        def test_end_edit(self, sut: StateTracker):
+            received = []
+            sut.listeners.append(received.append)
+
+            sut.begin_edit()
+            sut.end_edit()
+
+            assert received == [
+                StateTrackerEvent.BEGIN_EDIT,
+                StateTrackerEvent.END_EDIT,
+            ]
+
+        def test_cancel_edit(self, sut: StateTracker):
+            received = []
+            sut.listeners.append(received.append)
+
+            sut.begin_edit()
+            sut.cancel_edit()
+
+            assert received == [
+                StateTrackerEvent.BEGIN_EDIT,
+                StateTrackerEvent.CANCEL_EDIT,
+            ]
