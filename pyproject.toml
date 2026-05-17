@@ -33,3 +33,8 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "pytest-qt>=4.5.0",
+]
