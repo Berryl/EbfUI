@@ -1,3 +1,5 @@
+from typing import Any
+
 from ebf_core.reflection.attr_reflector import AttributeReflector
 from ebf_core.reflection.attr_selection import select_attrs
 from ebf_core.reflection.snapshot import capture, has_changes, get_changes
@@ -27,7 +29,7 @@ class StateTracker:
 
     def begin_edit(self) -> None:
         self.original = self._capture()
-        self.current = self.original.copy()
+        self.current = self.original.copy() # type: ignore[union-attr]
         self._notify(StateTrackerEvent.BEGIN_EDIT)
 
     def update_edit(self) -> None:
@@ -43,7 +45,7 @@ class StateTracker:
         self._notify(StateTrackerEvent.CANCEL_EDIT)
 
 
-    def _capture(self) -> dict:
+    def _capture(self) -> dict[str, Any]:
         reflector = AttributeReflector(self.instance)
         return capture(reflector, self.attrs)
 
