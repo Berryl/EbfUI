@@ -2,12 +2,15 @@ from ebf_core.reflection.attr_reflector import AttributeReflector
 from ebf_core.reflection.attr_selection import select_attrs
 from ebf_core.reflection.snapshot import capture, has_changes, get_changes
 
+from ebf_ui.state.state_events import StateTrackerListener, StateTrackerEvent
+
 
 class StateTracker:
     def __init__(self, instance: object):
         self.instance = instance
         self.original: dict | None = None
         self.current: dict | None = None
+        self.listeners: list[StateTrackerListener] = []
 
     @property
     def is_dirty(self) -> bool:
@@ -24,6 +27,7 @@ class StateTracker:
     def begin_edit(self) -> None:
         self.original = self._capture()
         self.current = self.original.copy()
+        self._notify(StateTrackerEvent.BEGIN_EDIT)
 
     def update_edit(self) -> None:
         self.current = self._capture()
@@ -32,7 +36,14 @@ class StateTracker:
         self.original = None
         self.current = None
 
+    def cancel_edit(self) -> None:
+        self.end_edit()
+
     def _capture(self) -> dict:
         reflector = AttributeReflector(self.instance)
         attrs = select_attrs(self.instance)
         return capture(reflector, attrs)
+
+    def _notify(self, event: StateTrackerEvent) -> None:
+        for listener in self.listeners:
+            listener(event)
