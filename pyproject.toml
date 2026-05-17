@@ -13,7 +13,7 @@ license = { text = "MIT" }
 
 dependencies = [
     "ebf-core",
-    "ebf-domain",
+    "pyside6>=6.11.1",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +26,6 @@ dev = [
 
 [tool.uv.sources]
 ebf-core = { path = "../EbfUtil", editable = true }
-ebf-domain = { path = "../EbfDomain", editable = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
