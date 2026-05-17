@@ -8,6 +8,7 @@ from ebf_ui.state.state_tracker import StateTracker
 
 class CommandBindingEvent(StrEnum):
     ENABLED_CHANGED = auto()
+    EXECUTED = auto()
 
 
 type CommandBindingListener = Callable[[CommandBindingEvent], None]
@@ -28,6 +29,7 @@ class CommandBinding:
             return
 
         self._execute()
+        self._notify(CommandBindingEvent.EXECUTED)
 
     @property
     def is_enabled(self) -> bool:

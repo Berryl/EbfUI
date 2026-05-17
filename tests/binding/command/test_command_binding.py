@@ -90,13 +90,12 @@ class TestCommandBinding:
             ]
 
     class TestExecutionCalls:
-        def test_not_called_when_disabled(self):
+        def test_not_called_when_disabled(self, tracker):
             calls = []
 
             def execute():
                 calls.append("executed")
 
-            tracker = StateTracker(SimpleNamespace(name="original"))
             validation = SimpleNamespace(is_valid=False)
 
             sut = CommandBinding(
@@ -110,13 +109,12 @@ class TestCommandBinding:
 
             assert calls == []
 
-        def test_execute_calls_command_when_enabled(self):
+        def test_called_when_enabled(self, tracker):
             calls = []
 
             def execute():
                 calls.append("executed")
 
-            tracker = StateTracker(SimpleNamespace(name="original"))
             validation = SimpleNamespace(is_valid=True)
 
             sut = CommandBinding(
@@ -133,3 +131,37 @@ class TestCommandBinding:
             sut.execute()
 
             assert calls == ["executed"]
+
+        def test_notifies_after_executed(self, tracker):
+            validation = SimpleNamespace(is_valid=True)
+            received = []
+
+            sut = CommandBinding(
+                tracker=tracker,
+                validation=validation,
+                execute=lambda: None,
+            )
+            sut.listeners.append(received.append)
+
+            tracker.begin_edit()
+            tracker.instance.name = "updated"
+            tracker.update_edit()
+
+            sut.execute()
+
+            assert received == [
+                CommandBindingEvent.ENABLED_CHANGED,
+                CommandBindingEvent.EXECUTED,
+            ]
+
+        def test_does_not_notify_when_disabled(self, tracker, to_execute):
+            validation = SimpleNamespace(is_valid=True)
+            received = []
+
+            sut = CommandBinding(tracker, validation, to_execute)
+            sut.listeners.append(received.append)
+
+            sut.execute()
+
+            assert received == []
+
