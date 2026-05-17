@@ -1,6 +1,8 @@
 from enum import StrEnum, auto
 from typing import Callable
 
+from ebf_ui.state.state_tracker import StateTracker
+
 
 class CommandBindingEvent(StrEnum):
     ENABLED_CHANGED = auto()
@@ -10,13 +12,20 @@ type CommandBindingListener = Callable[[CommandBindingEvent], None]
 
 
 class CommandBinding:
-    def __init__(self, tracker, validation):
+    def __init__(self, tracker: StateTracker, validation, execute: Callable[[], None]):
         self.tracker = tracker
         self.validation = validation
+        self._execute = execute
         self.listeners: list[CommandBindingListener] = []
         self._was_enabled = self.is_enabled
 
         tracker.listeners.append(self._on_state_changed)
+
+    def execute(self) -> None:
+        if not self.is_enabled:
+            return
+
+        self._execute()
 
     @property
     def is_enabled(self) -> bool:
