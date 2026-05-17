@@ -22,26 +22,36 @@ class StateTracker:
         return has_changes(self.original, self.current)
 
     @property
+    def is_editing(self) -> bool:
+        return self.original is not None
+
+    @property
     def changes(self) -> dict:
         if self.original is None or self.current is None:
             return {}
         return get_changes(self.original, self.current)
 
     def begin_edit(self) -> None:
+        if self.is_editing:
+            raise RuntimeError("begin_edit called while already editing")
+
         self.original = self._capture()
         self.current = self.original.copy()  # type: ignore[union-attr]
         self._notify(StateTrackerEvent.BEGIN_EDIT)
 
     def update_edit(self) -> None:
+        if not self.is_editing:
+            raise RuntimeError("update_edit called before begin_edit")
+
         self.current = self._capture()
         self._notify(StateTrackerEvent.UPDATE_EDIT)
 
     def end_edit(self) -> None:
-        self._reset()
+        self._reset("end")
         self._notify(StateTrackerEvent.END_EDIT)
 
     def cancel_edit(self) -> None:
-        self._reset()
+        self._reset("cancel")
         self._notify(StateTrackerEvent.CANCEL_EDIT)
 
     def _capture(self) -> dict[str, Any]:
@@ -52,6 +62,9 @@ class StateTracker:
         for listener in self.listeners:
             listener(event)
 
-    def _reset(self) -> None:
+    def _reset(self, action: str) -> None:
+        if not self.is_editing:
+            raise RuntimeError(f"{action}_edit called before begin_edit")
+
         self.original = None
         self.current = None

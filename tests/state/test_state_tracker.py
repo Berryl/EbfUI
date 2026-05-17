@@ -99,6 +99,46 @@ class TestStateTracker:
 
             assert not sut.is_dirty
 
+    class TestNestedPaths:
+        @pytest.fixture
+        def obj(self):
+            class Parent:
+                def __init__(self):
+                    self.name = "original"
+
+            class Child:
+                def __init__(self):
+                    self.parent = Parent()
+
+            return Child()
+
+        @pytest.fixture
+        def sut(self, obj):
+            return StateTracker(obj, requested_attrs=["parent.name"])
+
+        def test_is_dirty_is_false_immediately_after_begin_edit(self, sut):
+            sut.begin_edit()
+
+            assert not sut.is_dirty
+
+        def test_is_dirty_is_true_after_nested_attr_changes(self, sut, obj):
+            sut.begin_edit()
+
+            obj.parent.name = "updated"
+            sut.update_edit()
+
+            assert sut.is_dirty
+
+        def test_changes_reflects_nested_attr(self, sut, obj):
+            sut.begin_edit()
+
+            obj.parent.name = "updated"
+            sut.update_edit()
+
+            assert sut.changes == {
+                "parent.name": ("original", "updated")
+            }
+
     class TestListeners:
 
         def test_begin_edit(self, sut: StateTracker):
@@ -145,3 +185,43 @@ class TestStateTracker:
                 StateTrackerEvent.BEGIN_EDIT,
                 StateTrackerEvent.CANCEL_EDIT,
             ]
+
+    class TestIsEditing:
+        def test_is_false_before_begin_edit(self, sut):
+            assert not sut.is_editing
+
+        def test_is_true_after_begin_edit(self, sut):
+            sut.begin_edit()
+
+            assert sut.is_editing
+
+        def test_is_false_after_end_edit(self, sut):
+            sut.begin_edit()
+            sut.end_edit()
+
+            assert not sut.is_editing
+
+        def test_is_false_after_cancel_edit(self, sut):
+            sut.begin_edit()
+            sut.cancel_edit()
+
+            assert not sut.is_editing
+
+    class TestOutOfSequenceGuards:
+        def test_begin_edit_raises_if_already_editing(self, sut):
+            sut.begin_edit()
+
+            with pytest.raises(RuntimeError):
+                sut.begin_edit()
+
+        def test_update_edit_raises_if_not_editing(self, sut):
+            with pytest.raises(RuntimeError):
+                sut.update_edit()
+
+        def test_end_edit_raises_if_not_editing(self, sut):
+            with pytest.raises(RuntimeError):
+                sut.end_edit()
+
+        def test_cancel_edit_raises_if_not_editing(self, sut):
+            with pytest.raises(RuntimeError):
+                sut.cancel_edit()
