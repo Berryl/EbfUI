@@ -142,6 +142,53 @@ class TestStateTracker:
                 "parent.name": ("original", "updated")
             }
 
+    class TestRestoreOnCancel:
+        def test_cancel_edit_restores_original_values(self, sut: StateTracker, obj: MyClass):
+            sut.begin_edit()
+
+            obj.name = "updated"
+            sut.update_edit()
+
+            sut.cancel_edit()
+
+            assert obj.name == "original"
+
+        def test_end_edit_does_not_restore(self, sut: StateTracker, obj: MyClass):
+            sut.begin_edit()
+
+            obj.name = "updated"
+            sut.update_edit()
+
+            sut.end_edit()
+
+            assert obj.name == "updated"
+
+        def test_cancel_without_changes_leaves_instance_unchanged(self, sut: StateTracker, obj: MyClass):
+            sut.begin_edit()
+            sut.cancel_edit()
+
+            assert obj.name == "original"
+
+        def test_cancel_restores_nested_attr(self, obj: MyClass):
+            class Parent:
+                def __init__(self):
+                    self.name = "original"
+
+            class Child:
+                def __init__(self):
+                    self.parent = Parent()
+
+            child = Child()
+            sut = StateTracker(child, requested_attrs=["parent.name"])
+            sut.begin_edit()
+
+            child.parent.name = "updated"
+            sut.update_edit()
+
+            sut.cancel_edit()
+
+            assert child.parent.name == "original"
+
     class TestListeners:
 
         def test_begin_edit(self, sut: StateTracker):

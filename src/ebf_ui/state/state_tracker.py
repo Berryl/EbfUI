@@ -56,6 +56,7 @@ class StateTracker:
 
     def cancel_edit(self) -> None:
         self._ensure_editing("cancel")
+        self._restore()
         self._reset()
         self._notify(StateTrackerEvent.CANCEL_EDIT)
 
@@ -74,3 +75,9 @@ class StateTracker:
     def _reset(self) -> None:
         self.original = None
         self.current = None
+
+    def _restore(self) -> None:
+        reflector = AttributeReflector(self.instance)
+        assert self.original is not None, "Original state cannot be None during restore"
+        for attr, value in self.original.items():
+            reflector.set_value(attr, value)
