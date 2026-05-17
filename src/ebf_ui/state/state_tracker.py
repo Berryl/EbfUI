@@ -29,7 +29,7 @@ class StateTracker:
 
     def begin_edit(self) -> None:
         self.original = self._capture()
-        self.current = self.original.copy() # type: ignore[union-attr]
+        self.current = self.original.copy()  # type: ignore[union-attr]
         self._notify(StateTrackerEvent.BEGIN_EDIT)
 
     def update_edit(self) -> None:
@@ -43,7 +43,6 @@ class StateTracker:
     def cancel_edit(self) -> None:
         self._reset()
         self._notify(StateTrackerEvent.CANCEL_EDIT)
-
 
     def _capture(self) -> dict[str, Any]:
         reflector = AttributeReflector(self.instance)
