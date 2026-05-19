@@ -17,14 +17,14 @@ def test_typing_updates_model_and_enables_save(qtbot):
     tracker = StateTracker(person, requested_attrs=["name"])
     tracker.begin_edit()
 
-    validation = ValidationBinding(lambda: type(
-        "Result",
-        (),
-        {
-            "is_valid": bool(person.name.strip()),
-            "violations": [],
-        },
-    )())
+    class ValidationResult:
+        def __init__(self, is_valid: bool):
+            self.is_valid = is_valid
+            self.violations = []
+
+    validation = ValidationBinding(
+        lambda: ValidationResult(bool(person.name.strip()))
+    )
     bind_validation(tracker, validation)
 
     save_binding = CommandBinding(
