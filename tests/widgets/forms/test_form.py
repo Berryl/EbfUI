@@ -11,16 +11,16 @@ from ebf_ui.state.state_tracker import StateTracker
 class Person:
     name: str
 
+class ValidationResult:
+    def __init__(self, is_valid: bool):
+        self.is_valid = is_valid
+        self.violations = []
+
 def test_typing_updates_model_and_enables_save(qtbot):
     person = Person(name="original")
 
     tracker = StateTracker(person, requested_attrs=["name"])
     tracker.begin_edit()
-
-    class ValidationResult:
-        def __init__(self, is_valid: bool):
-            self.is_valid = is_valid
-            self.violations = []
 
     validation = ValidationBinding(
         lambda: ValidationResult(bool(person.name.strip()))
