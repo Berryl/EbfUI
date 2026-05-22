@@ -19,7 +19,7 @@ class ValidationResult:
 def test_typing_updates_model_and_enables_save(qtbot):
     person = Person(name="original")
 
-    tracker = StateTracker(person, requested_attrs=["name"])
+    tracker = StateTracker(person)
     tracker.begin_edit()
 
     validation = ValidationBinding(
