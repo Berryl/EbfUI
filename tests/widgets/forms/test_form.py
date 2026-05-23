@@ -18,117 +18,26 @@ class ValidationResult:
         self.violations = []
 
 
-def test_typing_updates_model_and_enables_save(qtbot):
-    person = Person(name="original")
-
-    tracker = StateTracker(person)
-    tracker.begin_edit()
-
-    validation = ValidationBinding(
-        lambda: ValidationResult(bool(person.name.strip()))
-    )
-    bind_validation(tracker, validation)
-
-    save_binding = CommandBinding(
-        tracker=tracker,
-        validation=validation,
-        execute=lambda: None,
-    )
-
-    widget = QWidget()
-    layout = QVBoxLayout(widget)
-
-    line_edit = QLineEdit()
-    save_button = QPushButton("Save")
-
-    layout.addWidget(line_edit)
-    layout.addWidget(save_button)
-
-    def sync_ui():
-        save_button.setEnabled(save_binding.is_enabled)
-
-    def on_text_changed(text: str):
-        person.name = text
-        tracker.update_edit()
-        sync_ui()
-
-    line_edit.textChanged.connect(on_text_changed)
-
-    sync_ui()
-
-    qtbot.addWidget(widget)
-
-    assert not save_button.isEnabled()
-
-    line_edit.setText("updated")
-
-    assert person.name == "updated"
-    assert tracker.is_dirty
-    assert validation.is_valid
-    assert save_button.isEnabled()
+@dataclass
+class FormHarness:
+    person: Person
+    tracker: StateTracker
+    validation: ValidationBinding
+    save_binding: CommandBinding
+    widget: QWidget
+    line_edit: QLineEdit
+    save_button: QPushButton
+    calls: list[str]
 
 
-def test_clearing_text_disables_save(qtbot):
-    person = Person(name="original")
-
-    tracker = StateTracker(person)
-    tracker.begin_edit()
-
-    validation = ValidationBinding(
-        lambda: ValidationResult(bool(person.name.strip()))
-    )
-    bind_validation(tracker, validation)
-
-    save_binding = CommandBinding(
-        tracker=tracker,
-        validation=validation,
-        execute=lambda: None,
-    )
-
-    widget = QWidget()
-    layout = QVBoxLayout(widget)
-
-    line_edit = QLineEdit()
-    save_button = QPushButton("Save")
-
-    layout.addWidget(line_edit)
-    layout.addWidget(save_button)
-
-    def sync_ui():
-        save_button.setEnabled(save_binding.is_enabled)
-
-    def on_text_changed(text: str):
-        person.name = text
-        tracker.update_edit()
-        sync_ui()
-
-    line_edit.textChanged.connect(on_text_changed)
-
-    sync_ui()
-
-    qtbot.addWidget(widget)
-
-    line_edit.setText("updated")
-
-    assert save_button.isEnabled()
-
-    line_edit.setText("")
-
-    assert not validation.is_valid
-    assert not save_button.isEnabled()
-
-
-def test_clicking_save_executes_command(qtbot):
+def build_form(qtbot) -> FormHarness:
     calls = []
-
     person = Person(name="original")
 
     tracker = StateTracker(person)
     tracker.begin_edit()
 
-    validation = ValidationBinding(
-        lambda: ValidationResult(bool(person.name.strip()))
-    )
+    validation = ValidationBinding(lambda: ValidationResult(bool(person.name.strip())))
     bind_validation(tracker, validation)
 
     save_binding = CommandBinding(
@@ -158,13 +67,52 @@ def test_clicking_save_executes_command(qtbot):
     save_button.clicked.connect(save_binding.execute)
 
     sync_ui()
-
     qtbot.addWidget(widget)
 
-    line_edit.setText("updated")
+    return FormHarness(
+        person=person,
+        tracker=tracker,
+        validation=validation,
+        save_binding=save_binding,
+        widget=widget,
+        line_edit=line_edit,
+        save_button=save_button,
+        calls=calls,
+    )
 
-    assert save_button.isEnabled()
 
-    save_button.click()
+def test_typing_updates_model_and_enables_save(qtbot):
+    h = build_form(qtbot)
 
-    assert calls == ["saved"]
+    assert not h.save_button.isEnabled()
+
+    h.line_edit.setText("updated")
+
+    assert h.person.name == "updated"
+    assert h.tracker.is_dirty
+    assert h.validation.is_valid
+    assert h.save_button.isEnabled()
+
+
+def test_clearing_text_disables_save(qtbot):
+    h = build_form(qtbot)
+
+    h.line_edit.setText("updated")
+    assert h.save_button.isEnabled()
+
+    h.line_edit.setText("")
+
+    assert not h.validation.is_valid
+    assert not h.save_button.isEnabled()
+
+
+def test_clicking_save_executes_command(qtbot):
+    h = build_form(qtbot)
+
+    h.line_edit.setText("updated")
+
+    assert h.save_button.isEnabled()
+
+    h.save_button.click()
+
+    assert h.calls == ["saved"]
