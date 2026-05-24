@@ -78,83 +78,87 @@ def form_harness(qtbot) -> SimpleNamespace:
     yield harness
 
 
-def test_save_is_enabled_when_text_is_not_blank(form_harness):
-    h = form_harness
+class TestWhenModelIsNotValid:
 
-    assert not h.save_button.isEnabled()
+    @pytest.mark.parametrize("blank_text", ["", "   ", "\t"])
+    def test_save_is_disabled(self, form_harness, blank_text):
+        h = form_harness
 
-    h.line_edit.setText("ted")
+        h.line_edit.setText("blah")
+        assert h.save_button.isEnabled()
 
-    assert h.person.name == "ted"
-    assert h.tracker.is_dirty
-    assert h.validation.is_valid
-    assert h.save_button.isEnabled()
+        h.line_edit.setText(blank_text)
 
-
-@pytest.mark.parametrize("blank_text", ["", "   ", "\t"])
-def test_save_is_disabled_when_text_is_blank(form_harness, blank_text):
-    h = form_harness
-
-    h.line_edit.setText("blah")
-    assert h.save_button.isEnabled()
-
-    h.line_edit.setText(blank_text)
-
-    assert not h.validation.is_valid
-    assert not h.save_button.isEnabled()
+        assert not h.validation.is_valid
+        assert not h.save_button.isEnabled()
 
 
-def test_clicking_save_executes_command(form_harness):
-    h = form_harness
+class TestWhenModelIsValidAndDirty:
 
-    h.line_edit.setText("blah")
-    h.save_button.click()
+    def test_save_is_enabled_when_text_is_not_blank(self, form_harness):
+        h = form_harness
 
-    assert h.calls == ["saved"]
+        assert not h.save_button.isEnabled()
 
+        h.line_edit.setText("ted")
 
-def test_refresh_does_not_mark_tracker_dirty(qtbot):
-    """External model change via refresh() should not mark the tracker dirty."""
-    person = Person(name="original")
-    tracker = StateTracker(person)
-    tracker.begin_edit()
+        assert h.person.name == "ted"
+        assert h.tracker.is_dirty
+        assert h.validation.is_valid
+        assert h.save_button.isEnabled()
 
-    line_edit = QLineEdit()
-    qtbot.addWidget(line_edit)
+    def test_clicking_save_executes_command(self, form_harness):
+        h = form_harness
 
-    binding = LineEditBinding(
-        line_edit=line_edit,
-        tracker=tracker,
-        get_value=lambda: person.name,
-        set_value=lambda v: setattr(person, "name", v),
-    )
+        h.line_edit.setText("blah")
+        h.save_button.click()
 
-    tracker.cancel_edit()
-
-    person.name = "updated externally"
-    binding.refresh()
-
-    assert line_edit.text() == "updated externally"
-    assert not tracker.is_dirty
+        assert h.calls == ["saved"]
 
 
-def test_model_value_of_none_displays_as_empty_text(qtbot):
-    person = Person(name=None)
-    tracker = StateTracker(person)
-    tracker.begin_edit()
+class TestEdgeCases:
 
-    line_edit = QLineEdit()
-    qtbot.addWidget(line_edit)
+    def test_refresh_does_not_mark_tracker_dirty(self, qtbot):
+        """External model change via refresh() should not mark the tracker dirty."""
+        person = Person(name="original")
+        tracker = StateTracker(person)
+        tracker.begin_edit()
 
-    LineEditBinding(
-        line_edit=line_edit,
-        tracker=tracker,
-        get_value=lambda: person.name,
-        set_value=lambda v: setattr(person, "name", v),
-    )
+        line_edit = QLineEdit()
+        qtbot.addWidget(line_edit)
 
-    assert line_edit.text() == ""
-    assert not tracker.is_dirty
+        binding = LineEditBinding(
+            line_edit=line_edit,
+            tracker=tracker,
+            get_value=lambda: person.name,
+            set_value=lambda v: setattr(person, "name", v),
+        )
+
+        tracker.cancel_edit()
+
+        person.name = "updated externally"
+        binding.refresh()
+
+        assert line_edit.text() == "updated externally"
+        assert not tracker.is_dirty
+
+    def test_model_value_of_none_displays_as_empty_text(self, qtbot):
+        person = Person(name=None)
+        tracker = StateTracker(person)
+        tracker.begin_edit()
+
+        line_edit = QLineEdit()
+        qtbot.addWidget(line_edit)
+
+        LineEditBinding(
+            line_edit=line_edit,
+            tracker=tracker,
+            get_value=lambda: person.name,
+            set_value=lambda v: setattr(person, "name", v),
+        )
+
+        assert line_edit.text() == ""
+        assert not tracker.is_dirty
 
 
 class TestSetError:
