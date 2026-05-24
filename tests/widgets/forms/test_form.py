@@ -21,7 +21,7 @@ class ValidationResult:
 
 
 def build_form(qtbot) -> SimpleNamespace:  # Changed to SimpleNamespace
-    calls = []
+    calls: list[str] = []
     person = Person(name="original")
 
     tracker = StateTracker(person)
