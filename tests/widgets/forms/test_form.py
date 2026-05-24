@@ -94,8 +94,9 @@ class TestWhenModelIsNotValid:
 
 
 class TestWhenModelIsValidAndDirty:
+    """ in this example the name is valid simply if it isn't blank"""
 
-    def test_save_is_enabled_when_text_is_not_blank(self, form_harness):
+    def test_save_is_enabled(self, form_harness):
         h = form_harness
 
         assert not h.save_button.isEnabled()
