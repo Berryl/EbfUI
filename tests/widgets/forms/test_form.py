@@ -37,7 +37,9 @@ def build_form(qtbot) -> FormHarness:
     tracker = StateTracker(person)
     tracker.begin_edit()
 
-    validation = ValidationBinding(lambda: ValidationResult(bool(person.name.strip())))
+    validation = ValidationBinding(
+        lambda: ValidationResult(bool(person.name.strip()))
+    )
     bind_validation(tracker, validation)
 
     save_binding = CommandBinding(
@@ -81,23 +83,23 @@ def build_form(qtbot) -> FormHarness:
     )
 
 
-def test_typing_updates_model_and_enables_save(qtbot):
+def test_save_is_enabled_when_text_is_not_blank(qtbot):
     h = build_form(qtbot)
 
     assert not h.save_button.isEnabled()
 
-    h.line_edit.setText("updated")
+    h.line_edit.setText("ted")
 
-    assert h.person.name == "updated"
+    assert h.person.name == "ted"
     assert h.tracker.is_dirty
     assert h.validation.is_valid
     assert h.save_button.isEnabled()
 
 
-def test_clearing_text_disables_save(qtbot):
+def test_save_is_disabled_when_text_is_cleared(qtbot):
     h = build_form(qtbot)
 
-    h.line_edit.setText("updated")
+    h.line_edit.setText("blah")
     assert h.save_button.isEnabled()
 
     h.line_edit.setText("")
@@ -109,7 +111,7 @@ def test_clearing_text_disables_save(qtbot):
 def test_clicking_save_executes_command(qtbot):
     h = build_form(qtbot)
 
-    h.line_edit.setText("updated")
+    h.line_edit.setText("blah")
 
     assert h.save_button.isEnabled()
 
