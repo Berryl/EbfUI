@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from types import SimpleNamespace
 
+import pytest
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton
 
 from ebf_ui.binding.command.command_binding import CommandBinding
@@ -18,28 +20,20 @@ class ValidationResult:
         self.violations = []
 
 
-@dataclass
-class FormHarness:
-    person: Person
-    tracker: StateTracker
-    validation: ValidationBinding
-    save_binding: CommandBinding
-    widget: QWidget
-    line_edit: QLineEdit
-    save_button: QPushButton
-    calls: list[str]
-
-
-def build_form(qtbot) -> FormHarness:
+def build_form(qtbot) -> SimpleNamespace:   # Changed to SimpleNamespace
     calls = []
     person = Person(name="original")
 
     tracker = StateTracker(person)
     tracker.begin_edit()
 
-    validation = ValidationBinding(
-        lambda: ValidationResult(bool(person.name.strip()))
-    )
+    def validate():
+        return SimpleNamespace(
+            is_valid=bool(person.name.strip()),
+            violations=[]
+        )
+
+    validation = ValidationBinding(validate)
     bind_validation(tracker, validation)
 
     save_binding = CommandBinding(
@@ -71,7 +65,7 @@ def build_form(qtbot) -> FormHarness:
     sync_ui()
     qtbot.addWidget(widget)
 
-    return FormHarness(
+    return SimpleNamespace(
         person=person,
         tracker=tracker,
         validation=validation,
@@ -81,7 +75,6 @@ def build_form(qtbot) -> FormHarness:
         save_button=save_button,
         calls=calls,
     )
-
 
 def test_save_is_enabled_when_text_is_not_blank(qtbot):
     h = build_form(qtbot)
@@ -96,13 +89,14 @@ def test_save_is_enabled_when_text_is_not_blank(qtbot):
     assert h.save_button.isEnabled()
 
 
-def test_save_is_disabled_when_text_is_cleared(qtbot):
+@pytest.mark.parametrize("blank_text", ["", "   "])
+def test_save_is_disabled_when_text_is_cleared(qtbot, blank_text):
     h = build_form(qtbot)
 
     h.line_edit.setText("blah")
     assert h.save_button.isEnabled()
 
-    h.line_edit.setText("")
+    h.line_edit.setText(blank_text)
 
     assert not h.validation.is_valid
     assert not h.save_button.isEnabled()
