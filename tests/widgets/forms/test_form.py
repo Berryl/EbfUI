@@ -160,8 +160,10 @@ class TestSetError:
 
     class TestWhenError:
 
-        def test_tooltip_displays_error_and_stylesheet(self, qtbot):
+        @pytest.fixture
+        def qle_with_error(self, qtbot) -> QLineEdit:
             line_edit = QLineEdit()
+            line_edit.setStyleSheet("background: black;")
             qtbot.addWidget(line_edit)
 
             binding = LineEditBinding(
@@ -172,9 +174,13 @@ class TestSetError:
             )
 
             binding.set_error("Name is required")
+            return line_edit
 
-            assert line_edit.toolTip() == "Name is required"
-            assert ERROR_STYLESHEET in line_edit.styleSheet()
+        def test_tooltip_displays_error_and_stylesheet(self,  qle_with_error: QLineEdit):
+            assert qle_with_error.toolTip() == "Name is required"
+
+        def test_stylesheet_includes_error_style(self,  qle_with_error: QLineEdit):
+            assert ERROR_STYLESHEET in qle_with_error.styleSheet()
 
     class TestWhenNoError:
 
