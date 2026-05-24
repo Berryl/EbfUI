@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton
 from ebf_ui.binding.command.command_binding import CommandBinding
 from ebf_ui.binding.validation.validation_binding import ValidationBinding, bind_validation
 from ebf_ui.state.state_tracker import StateTracker
+from ebf_ui.widgets.fields.button_binding import ButtonBinding
 from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding, ERROR_STYLESHEET
 
 
@@ -49,13 +50,15 @@ def build_form(qtbot) -> SimpleNamespace:
         tracker=tracker,
         get_value=lambda: person.name,
         set_value=lambda v: setattr(person, "name", v),
-        sync_ui=lambda: save_button.setEnabled(save_binding.is_enabled),
+    )
+
+    button_binding = ButtonBinding(
+        button=save_button,
+        command=save_binding,
     )
 
     layout.addWidget(line_edit)
     layout.addWidget(save_button)
-
-    save_button.clicked.connect(save_binding.execute)
 
     qtbot.addWidget(widget)
 
@@ -65,6 +68,7 @@ def build_form(qtbot) -> SimpleNamespace:
         validation=validation,
         save_binding=save_binding,
         name_binding=name_binding,
+        button_binding=button_binding,
         line_edit=line_edit,
         save_button=save_button,
         calls=calls,
