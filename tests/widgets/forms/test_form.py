@@ -156,39 +156,43 @@ def test_model_value_of_none_displays_as_empty_text(qtbot):
     assert line_edit.text() == ""
     assert not tracker.is_dirty
 
+class TestSetError:
 
-def test_set_error_applies_tooltip_and_stylesheet(qtbot):
-    line_edit = QLineEdit()
-    qtbot.addWidget(line_edit)
+    class TestWhenError:
 
-    binding = LineEditBinding(
-        line_edit=line_edit,
-        tracker=StateTracker(SimpleNamespace()),
-        get_value=lambda: "",
-        set_value=lambda v: None,
-    )
+        def test_tooltip_displays_error_and_stylesheet(self, qtbot):
+            line_edit = QLineEdit()
+            qtbot.addWidget(line_edit)
 
-    binding.set_error("Name is required")
+            binding = LineEditBinding(
+                line_edit=line_edit,
+                tracker=StateTracker(SimpleNamespace()),
+                get_value=lambda: "",
+                set_value=lambda v: None,
+            )
 
-    assert line_edit.toolTip() == "Name is required"
-    assert ERROR_STYLESHEET in line_edit.styleSheet()
+            binding.set_error("Name is required")
 
+            assert line_edit.toolTip() == "Name is required"
+            assert ERROR_STYLESHEET in line_edit.styleSheet()
 
-def test_clear_error_restores_original_stylesheet(qtbot):
-    line_edit = QLineEdit()
-    line_edit.setStyleSheet("background: black;")
+    class TestWhenNoError:
 
-    qtbot.addWidget(line_edit)
+        def test_clear_error_restores_original_stylesheet(self, qtbot):
+            line_edit = QLineEdit()
+            line_edit.setStyleSheet("background: black;")
 
-    binding = LineEditBinding(
-        line_edit=line_edit,
-        tracker=StateTracker(SimpleNamespace()),
-        get_value=lambda: "",
-        set_value=lambda v: None,
-    )
+            qtbot.addWidget(line_edit)
 
-    binding.set_error("bad")
-    binding.set_error(None)
+            binding = LineEditBinding(
+                line_edit=line_edit,
+                tracker=StateTracker(SimpleNamespace()),
+                get_value=lambda: "",
+                set_value=lambda v: None,
+            )
 
-    assert line_edit.toolTip() == ""
-    assert line_edit.styleSheet() == "background: black;"
+            binding.set_error("bad")
+            binding.set_error(None)
+
+            assert line_edit.toolTip() == ""
+            assert line_edit.styleSheet() == "background: black;"
