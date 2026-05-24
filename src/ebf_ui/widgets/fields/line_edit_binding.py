@@ -4,6 +4,8 @@ from PySide6.QtWidgets import QLineEdit
 
 from ebf_ui.state.state_tracker import StateTracker
 
+ERROR_STYLESHEET = "QLineEdit { border: 2px solid #e74c3c; }"
+
 
 class LineEditBinding:
     """Two-way binding between a QLineEdit and a property in the model."""
@@ -22,16 +24,26 @@ class LineEditBinding:
         self.set_value = set_value
         self.sync_ui = sync_ui
         self._is_refreshing = False
+        self._original_stylesheet = line_edit.styleSheet()
 
         line_edit.textChanged.connect(self._on_text_changed)
 
         self._push_model_to_view()
-        self._sync()
+        self._sync_ui_state()
 
     def refresh(self) -> None:
         """Call this when the model changes from outside the line edit."""
         self._push_model_to_view()
-        self._sync()
+        self._sync_ui_state()
+
+    def set_error(self, message: str | None) -> None:
+        if message:
+            self.line_edit.setStyleSheet(self._original_stylesheet + ERROR_STYLESHEET)
+            self.line_edit.setToolTip(message)
+        else:
+            # Restore original appearance
+            self.line_edit.setStyleSheet(self._original_stylesheet)
+            self.line_edit.setToolTip("")
 
     def _on_text_changed(self, text: str) -> None:
         """Called when the user types in the line edit."""
@@ -39,7 +51,7 @@ class LineEditBinding:
             return
         self.set_value(text)
         self.tracker.update_edit()
-        self._sync()
+        self._sync_ui_state()
 
     def _push_model_to_view(self) -> None:
         """Push the current model value to the QLineEdit."""
@@ -53,7 +65,7 @@ class LineEditBinding:
             finally:
                 self._is_refreshing = False
 
-    def _sync(self):
-        """Sync UI state (button enablement, validation styling, etc.)."""
+    def _sync_ui_state(self) -> None:
+        """button enablement, validation styling, etc."""
         if self.sync_ui is not None:
             self.sync_ui()
