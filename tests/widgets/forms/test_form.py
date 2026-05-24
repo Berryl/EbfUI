@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton
 from ebf_ui.binding.command.command_binding import CommandBinding
 from ebf_ui.binding.validation.validation_binding import ValidationBinding, bind_validation
 from ebf_ui.state.state_tracker import StateTracker
-from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding
+from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding, ERROR_STYLESHEET
 
 
 @dataclass
@@ -21,7 +21,6 @@ def build_form(qtbot) -> SimpleNamespace:
     person = Person(name="original")
 
     tracker = StateTracker(person)
-    tracker.begin_edit()
 
     def validate():
         return SimpleNamespace(
@@ -37,6 +36,7 @@ def build_form(qtbot) -> SimpleNamespace:
         validation=validation,
         execute=lambda: calls.append("saved"),
     )
+    tracker.begin_edit()
 
     widget = QWidget()
     layout = QVBoxLayout(widget)
@@ -68,7 +68,7 @@ def build_form(qtbot) -> SimpleNamespace:
         line_edit=line_edit,
         save_button=save_button,
         calls=calls,
-        _root_widget=widget,          # for cleanup
+        _root_widget=widget,  # for cleanup
     )
 
 
@@ -76,10 +76,6 @@ def build_form(qtbot) -> SimpleNamespace:
 def form_harness(qtbot) -> SimpleNamespace:
     harness = build_form(qtbot)
     yield harness
-
-    # Clean up Qt objects to prevent "already deleted" errors
-    if hasattr(harness, "_root_widget") and harness._root_widget is not None:
-        harness._root_widget.deleteLater()
 
 
 def test_save_is_enabled_when_text_is_not_blank(form_harness):
@@ -116,13 +112,15 @@ def test_clicking_save_executes_command(form_harness):
 
     assert h.calls == ["saved"]
 
-def test_refresh_does_not_mark_tracker_dirty(form_harness):
+
+def test_refresh_does_not_mark_tracker_dirty(qtbot):
     """External model change via refresh() should not mark the tracker dirty."""
     person = Person(name="original")
     tracker = StateTracker(person)
     tracker.begin_edit()
 
     line_edit = QLineEdit()
+    qtbot.addWidget(line_edit)
 
     binding = LineEditBinding(
         line_edit=line_edit,
@@ -138,3 +136,59 @@ def test_refresh_does_not_mark_tracker_dirty(form_harness):
 
     assert line_edit.text() == "updated externally"
     assert not tracker.is_dirty
+
+
+def test_model_value_of_none_displays_as_empty_text(qtbot):
+    person = Person(name=None)
+    tracker = StateTracker(person)
+    tracker.begin_edit()
+
+    line_edit = QLineEdit()
+    qtbot.addWidget(line_edit)
+
+    LineEditBinding(
+        line_edit=line_edit,
+        tracker=tracker,
+        get_value=lambda: person.name,
+        set_value=lambda v: setattr(person, "name", v),
+    )
+
+    assert line_edit.text() == ""
+    assert not tracker.is_dirty
+
+
+def test_set_error_applies_tooltip_and_stylesheet(qtbot):
+    line_edit = QLineEdit()
+    qtbot.addWidget(line_edit)
+
+    binding = LineEditBinding(
+        line_edit=line_edit,
+        tracker=StateTracker(SimpleNamespace()),
+        get_value=lambda: "",
+        set_value=lambda v: None,
+    )
+
+    binding.set_error("Name is required")
+
+    assert line_edit.toolTip() == "Name is required"
+    assert ERROR_STYLESHEET in line_edit.styleSheet()
+
+
+def test_clear_error_restores_original_stylesheet(qtbot):
+    line_edit = QLineEdit()
+    line_edit.setStyleSheet("background: black;")
+
+    qtbot.addWidget(line_edit)
+
+    binding = LineEditBinding(
+        line_edit=line_edit,
+        tracker=StateTracker(SimpleNamespace()),
+        get_value=lambda: "",
+        set_value=lambda v: None,
+    )
+
+    binding.set_error("bad")
+    binding.set_error(None)
+
+    assert line_edit.toolTip() == ""
+    assert line_edit.styleSheet() == "background: black;"

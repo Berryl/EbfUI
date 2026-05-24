@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable
 
 from PySide6.QtWidgets import QLineEdit
 
@@ -14,7 +14,7 @@ class LineEditBinding:
             self,
             line_edit: QLineEdit,
             tracker: StateTracker,
-            get_value: Callable[[], Any],
+            get_value: Callable[[], str | None],
             set_value: Callable[[str], None],
             sync_ui: Callable[[], None] | None = None,
     ):
@@ -41,7 +41,6 @@ class LineEditBinding:
             self.line_edit.setStyleSheet(self._original_stylesheet + ERROR_STYLESHEET)
             self.line_edit.setToolTip(message)
         else:
-            # Restore original appearance
             self.line_edit.setStyleSheet(self._original_stylesheet)
             self.line_edit.setToolTip("")
 
@@ -66,6 +65,5 @@ class LineEditBinding:
                 self._is_refreshing = False
 
     def _sync_ui_state(self) -> None:
-        """button enablement, validation styling, etc."""
         if self.sync_ui is not None:
             self.sync_ui()
