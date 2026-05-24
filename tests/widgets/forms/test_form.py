@@ -20,7 +20,7 @@ class ValidationResult:
         self.violations = []
 
 
-def build_form(qtbot) -> SimpleNamespace:   # Changed to SimpleNamespace
+def build_form(qtbot) -> SimpleNamespace:  # Changed to SimpleNamespace
     calls = []
     person = Person(name="original")
 
@@ -76,6 +76,7 @@ def build_form(qtbot) -> SimpleNamespace:   # Changed to SimpleNamespace
         calls=calls,
     )
 
+
 def test_save_is_enabled_when_text_is_not_blank(qtbot):
     h = build_form(qtbot)
 
@@ -89,8 +90,8 @@ def test_save_is_enabled_when_text_is_not_blank(qtbot):
     assert h.save_button.isEnabled()
 
 
-@pytest.mark.parametrize("blank_text", ["", "   "])
-def test_save_is_disabled_when_text_is_cleared(qtbot, blank_text):
+@pytest.mark.parametrize("blank_text", ["", "   ", "\t"])
+def test_save_is_disabled_when_text_is_blank(qtbot, blank_text):
     h = build_form(qtbot)
 
     h.line_edit.setText("blah")
@@ -106,9 +107,6 @@ def test_clicking_save_executes_command(qtbot):
     h = build_form(qtbot)
 
     h.line_edit.setText("blah")
-
-    assert h.save_button.isEnabled()
-
     h.save_button.click()
 
     assert h.calls == ["saved"]
