@@ -8,6 +8,9 @@ from ebf_ui.state.state_tracker import StateTracker
 # region protocols
 class ValidationViolation(Protocol):
     @property
+    def field_name(self) -> str: ...
+
+    @property
     def ui_error_message(self) -> str: ...
 
 
@@ -17,6 +20,10 @@ class ValidationState(Protocol):
 
     @property
     def violations(self) -> list[ValidationViolation]: ...
+
+
+class ErrorTarget(Protocol):
+    def set_error(self, message: str | None) -> None: ...
 
 
 # endregion

@@ -166,7 +166,7 @@ class TestEdgeCases:
         assert not tracker.is_dirty
 
 
-class TestSetError:
+class TestSetErrorWithLineEditBinding:
 
     @pytest.fixture
     def binding_with_error(self, qtbot) -> LineEditBinding:
@@ -204,3 +204,28 @@ class TestSetError:
 
         def test_stylesheet_is_restored(self, binding_without_error: LineEditBinding):
             assert binding_without_error.line_edit.styleSheet() == "background: black;"
+
+class TestSetError:
+    class TestWhenError:
+        def test_tooltip_displays_error(self, form_harness):
+            form_harness.name_binding.set_error("Name is required")
+
+            assert form_harness.line_edit.toolTip() == "Name is required"
+
+        def test_stylesheet_includes_error_style(self, form_harness):
+            form_harness.name_binding.set_error("Name is required")
+
+            assert ERROR_STYLESHEET in form_harness.line_edit.styleSheet()
+
+    class TestWhenNoError:
+        def test_tooltip_is_cleared(self, form_harness):
+            form_harness.name_binding.set_error("Name is required")
+            form_harness.name_binding.set_error(None)
+
+            assert form_harness.line_edit.toolTip() == ""
+
+        def test_stylesheet_is_restored(self, form_harness):
+            form_harness.name_binding.set_error("Name is required")
+            form_harness.name_binding.set_error(None)
+
+            assert ERROR_STYLESHEET not in form_harness.line_edit.styleSheet()
