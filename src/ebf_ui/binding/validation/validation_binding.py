@@ -22,10 +22,6 @@ class ValidationState(Protocol):
     def violations(self) -> list[ValidationViolation]: ...
 
 
-class ErrorTarget(Protocol):
-    def set_error(self, message: str | None) -> None: ...
-
-
 # endregion
 
 

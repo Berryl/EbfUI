@@ -1,4 +1,10 @@
-from ebf_ui.binding.validation.validation_binding import ValidationState, ErrorTarget
+from typing import Protocol
+
+from ebf_ui.binding.validation.validation_binding import ValidationState
+
+
+class ErrorTarget(Protocol):
+    def set_error(self, message: str | None) -> None: ...
 
 
 class ViolationMapper:
