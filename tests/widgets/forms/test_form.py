@@ -10,6 +10,7 @@ from ebf_ui.binding.validation.violation_mapper import ViolationMapper
 from ebf_ui.state.state_tracker import StateTracker
 from ebf_ui.widgets.fields.button_binding import ButtonBinding
 from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding
+from ebf_ui.widgets.forms.form_binding import FormBinding
 from ebf_ui.widgets.styles import ERROR_STYLESHEET
 
 
@@ -79,6 +80,8 @@ def build_form(qtbot) -> SimpleNamespace:
         command=save_binding,
     )
 
+    form = FormBinding([name_binding, button_binding])
+
     layout.addWidget(line_edit)
     layout.addWidget(save_button)
 
@@ -91,6 +94,7 @@ def build_form(qtbot) -> SimpleNamespace:
         save_binding=save_binding,
         name_binding=name_binding,
         button_binding=button_binding,
+        form=form,
         line_edit=line_edit,
         save_button=save_button,
         calls=calls,
@@ -187,6 +191,7 @@ class TestEdgeCases:
 
         assert line_edit.text() == ""
         assert not tracker.is_dirty
+
 
 class TestSetError:
     class TestWhenError:
