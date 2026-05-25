@@ -53,7 +53,7 @@ def build_form(qtbot) -> SimpleNamespace:
         set_value=lambda v: setattr(person, "name", v),
     )
 
-    violation_mapper = ViolationMapper({"name": name_binding, })
+    violation_mapper = ViolationMapper({"name": name_binding})
 
     def sync_ui():
         save_button.setEnabled(save_binding.is_enabled)

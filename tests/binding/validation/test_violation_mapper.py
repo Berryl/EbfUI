@@ -8,6 +8,7 @@ from ebf_ui.binding.validation.violation_mapper import ViolationMapper
 
 class TestViolationMapper:
 
+    # region fixtures
     @pytest.fixture
     def name_missing_violation(self) -> ValidationViolation:
         return SimpleNamespace(field_name="name", ui_error_message="Name is required")
@@ -23,6 +24,7 @@ class TestViolationMapper:
     @pytest.fixture
     def received(self):
         return []
+    # endregion
 
     @pytest.fixture
     def sut(self, received) -> ViolationMapper:
