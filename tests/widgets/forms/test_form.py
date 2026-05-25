@@ -25,9 +25,20 @@ def build_form(qtbot) -> SimpleNamespace:
     tracker = StateTracker(person)
 
     def validate():
+        if person.name.strip():
+            return SimpleNamespace(
+                is_valid=True,
+                violations=[],
+            )
+
         return SimpleNamespace(
-            is_valid=bool(person.name.strip()),
-            violations=[],
+            is_valid=False,
+            violations=[
+                SimpleNamespace(
+                    field_name="name",
+                    ui_error_message="Name is required",
+                )
+            ],
         )
 
     validation = ValidationBinding(validate)
@@ -104,6 +115,7 @@ class TestWhenModelIsNotValid:
         h.line_edit.setText(blank_text)
 
         assert not h.validation.is_valid
+        assert h.line_edit.toolTip() == "Name is required"
         assert not h.save_button.isEnabled()
 
 

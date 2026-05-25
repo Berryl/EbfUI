@@ -24,6 +24,7 @@ class TestViolationMapper:
     @pytest.fixture
     def received(self):
         return []
+
     # endregion
 
     @pytest.fixture
@@ -49,22 +50,6 @@ class TestViolationMapper:
 
                 assert received == [[]]
 
-        class TestUnviolatedBindings:
-
-            def test_remain_cleared(self, name_missing_violation):
-                name_received = []
-                email_received = []
-                validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation])
-                sut = ViolationMapper({
-                    "name": SimpleNamespace(set_errors=name_received.append),
-                    "email": SimpleNamespace(set_errors=email_received.append),
-                })
-
-                sut.apply(validation)
-
-                assert name_received == [["Name is required"]]
-                assert email_received == [[]]
-
     class TestWhenMultipleViolations:
 
         def test_same_field_are_stacked(self, sut, name_missing_violation, name_too_long_violation, received):
@@ -82,3 +67,19 @@ class TestViolationMapper:
             sut.apply(validation)
 
             assert received == [[]]
+
+    class TestWhenMultipleBindingsAndSingleViolation:
+
+        def test_unviolated_bindings_remain_cleared(self, name_missing_violation):
+            name_received = []
+            email_received = []
+            validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation])
+            sut = ViolationMapper({
+                "name": SimpleNamespace(set_errors=name_received.append),
+                "email": SimpleNamespace(set_errors=email_received.append),
+            })
+
+            sut.apply(validation)
+
+            assert name_received == [["Name is required"]]
+            assert email_received == [[]]
