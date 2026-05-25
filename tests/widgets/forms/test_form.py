@@ -89,7 +89,7 @@ def build_form(qtbot) -> SimpleNamespace:
 
     return SimpleNamespace(
         person=person,
-        tracker=tracker,lj
+        tracker=tracker,
         validation=validation,
         save_binding=save_binding,
         name_binding=name_binding,
