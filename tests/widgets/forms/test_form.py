@@ -89,7 +89,7 @@ def build_form(qtbot) -> SimpleNamespace:
 
     return SimpleNamespace(
         person=person,
-        tracker=tracker,
+        tracker=tracker,lj
         validation=validation,
         save_binding=save_binding,
         name_binding=name_binding,
@@ -98,7 +98,7 @@ def build_form(qtbot) -> SimpleNamespace:
         line_edit=line_edit,
         save_button=save_button,
         calls=calls,
-        _root_widget=widget,  # for cleanup
+        _root_widget=widget,  # keep Qt widget tree alive for the test
     )
 
 

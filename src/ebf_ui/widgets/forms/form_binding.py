@@ -3,7 +3,7 @@ from collections.abc import Iterable
 
 class FormBinding:
     def __init__(self, bindings: Iterable[object] = ()):
-        # Holds strong references to prevent Qt signal-bound bindings from being GC'd
+        # this holds strong references to prevent Qt signal-bound bindings from being GC'd
         self.bindings = list(bindings)
 
     def add(self, binding: object) -> None:
