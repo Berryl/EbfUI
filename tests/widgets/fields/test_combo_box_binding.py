@@ -34,7 +34,7 @@ class TestComboBoxBinding:
         return c
 
     @pytest.fixture
-    def binding(self, combo, tracker, person):
+    def sut(self, combo, tracker, person):
         return ComboBoxBinding(
             combo_box=combo,
             tracker=tracker,
@@ -45,8 +45,8 @@ class TestComboBoxBinding:
 
     class TestItemLoading:
 
-        def test_all_items_are_loaded(self, binding):
-            cbo = binding.combo_box
+        def test_all_items_are_loaded(self, sut):
+            cbo = sut.combo_box
             assert cbo.count() == 2
             assert cbo.itemText(0) == "active"
             assert cbo.itemText(1) == "inactive"
@@ -89,8 +89,8 @@ class TestComboBoxBinding:
 
             assert binding.combo_box.currentText() == "inactive"
 
-        def test_tracker_is_not_made_dirty(self, binding):
-            assert not binding.tracker.is_dirty
+        def test_tracker_is_not_made_dirty(self, sut):
+            assert not sut.tracker.is_dirty
 
         def test_when_none_value_then_shows_no_selection(self, qtbot):
             binding = self._bind_person_with_status_of(None, qtbot)
@@ -102,33 +102,33 @@ class TestComboBoxBinding:
 
     class TestUserSelection:
 
-        def test_updates_model(self, person, binding):
-            binding.combo_box.setCurrentIndex(1)
+        def test_updates_model(self, person, sut):
+            sut.combo_box.setCurrentIndex(1)
 
             assert person.status == "inactive"
 
-        def test_marks_tracker_dirty(self, tracker, binding):
-            binding.combo_box.setCurrentIndex(1)
+        def test_marks_tracker_dirty(self, tracker, sut):
+            sut.combo_box.setCurrentIndex(1)
 
             assert tracker.is_dirty
 
-        def test_deselecting_sets_none_on_model(self, person, binding):
-            binding.combo_box.setCurrentIndex(-1)
+        def test_deselecting_sets_none_on_model(self, person, sut):
+            sut.combo_box.setCurrentIndex(-1)
 
             assert person.status is None
 
     class TestRefresh:
 
-        def test_updates_display(self, combo, tracker, person, binding):
+        def test_updates_display(self, combo, tracker, person, sut):
             tracker.cancel_edit()
             person.status = "inactive"
-            binding.refresh()
+            sut.refresh()
 
             assert combo.currentText() == "inactive"
 
-        def test_does_not_mark_tracker_dirty(self, tracker, person, binding):
+        def test_does_not_mark_tracker_dirty(self, tracker, person, sut):
             tracker.cancel_edit()
             person.status = "inactive"
-            binding.refresh()
+            sut.refresh()
 
             assert not tracker.is_dirty
