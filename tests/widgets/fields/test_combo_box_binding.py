@@ -137,28 +137,29 @@ class TestComboBoxBinding:
 
             assert not sut.tracker.is_dirty
 
-    class TestSetError:
+    class TestSetErrors:
 
-        def test_tooltip_displays_error(self, sut):
-            sut.set_errors(["Name is required"])
-            assert sut.combo_box.toolTip() == "Name is required"
+        class TestWhenErrors:
+            def test_tooltip_displays_error(self, sut):
+                sut.set_errors(["Status is required"])
+                assert sut.combo_box.toolTip() == "Status is required"
 
-        def test_stylesheet_includes_error_style(self, sut):
-            sut.set_errors(["Name is required"])
-            assert ERROR_STYLESHEET in sut.combo_box.styleSheet()
+            def test_stylesheet_includes_error_style(self, sut):
+                sut.set_errors(["Status is required"])
+                assert ERROR_STYLESHEET in sut.combo_box.styleSheet()
 
-        def test_tooltip_stacks_multiple_errors(self, sut):
-            sut.set_errors(["Name is required", "Name is too long"])
-            assert sut.combo_box.toolTip() == "Name is required<br>Name is too long"
+            def test_tooltip_stacks_multiple_errors(self, sut):
+                sut.set_errors(["Status is required", "Status is too long"])
+                assert sut.combo_box.toolTip() == "Status is required<br>Status is too long"
 
-        class TestWhenNoError:
+        class TestWhenNoErrors:
 
             def test_tooltip_is_cleared(self, sut):
-                sut.set_errors(["Name is required"])
+                sut.set_errors(["Status is required"])
                 sut.set_errors([])
                 assert sut.combo_box.toolTip() == ""
 
             def test_stylesheet_is_restored(self, sut):
-                sut.set_errors(["Name is required"])
+                sut.set_errors(["Status is required"])
                 sut.set_errors([])
                 assert ERROR_STYLESHEET not in sut.combo_box.styleSheet()
