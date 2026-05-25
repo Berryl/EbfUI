@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton
 
 from ebf_ui.binding.command.command_binding import CommandBinding
 from ebf_ui.binding.validation.validation_binding import ValidationBinding, bind_validation
+from ebf_ui.binding.validation.violation_mapper import ViolationMapper
 from ebf_ui.state.state_tracker import StateTracker
 from ebf_ui.widgets.fields.button_binding import ButtonBinding
 from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding, ERROR_STYLESHEET
@@ -51,6 +52,15 @@ def build_form(qtbot) -> SimpleNamespace:
         get_value=lambda: person.name,
         set_value=lambda v: setattr(person, "name", v),
     )
+
+    violation_mapper = ViolationMapper({"name": name_binding, })
+
+    def sync_ui():
+        save_button.setEnabled(save_binding.is_enabled)
+        if validation.result is not None:
+            violation_mapper.apply(validation.result)
+
+    name_binding.sync_ui = sync_ui
 
     button_binding = ButtonBinding(
         button=save_button,
@@ -164,46 +174,6 @@ class TestEdgeCases:
 
         assert line_edit.text() == ""
         assert not tracker.is_dirty
-
-
-class TestSetErrorWithLineEditBinding:
-
-    @pytest.fixture
-    def binding_with_error(self, qtbot) -> LineEditBinding:
-        line_edit = QLineEdit()
-        line_edit.setStyleSheet("background: black;")
-        qtbot.addWidget(line_edit)
-
-        binding = LineEditBinding(
-            line_edit=line_edit,
-            tracker=StateTracker(SimpleNamespace()),
-            get_value=lambda: "",
-            set_value=lambda v: None,
-        )
-
-        binding.set_error("Name is required")
-        return binding
-
-    class TestWhenError:
-
-        def test_tooltip_displays_error(self, binding_with_error: LineEditBinding):
-            assert binding_with_error.line_edit.toolTip() == "Name is required"
-
-        def test_stylesheet_includes_error_style(self, binding_with_error: LineEditBinding):
-            assert ERROR_STYLESHEET in binding_with_error.line_edit.styleSheet()
-
-    class TestWhenNoError:
-
-        @pytest.fixture
-        def binding_without_error(self, binding_with_error: LineEditBinding) -> LineEditBinding:
-            binding_with_error.set_error(None)
-            return binding_with_error
-
-        def test_tooltip_is_cleared(self, binding_without_error: LineEditBinding):
-            assert binding_without_error.line_edit.toolTip() == ""
-
-        def test_stylesheet_is_restored(self, binding_without_error: LineEditBinding):
-            assert binding_without_error.line_edit.styleSheet() == "background: black;"
 
 class TestSetError:
     class TestWhenError:
