@@ -8,7 +8,6 @@ ERROR_STYLESHEET = "QLineEdit { border: 2px solid #e74c3c; }"
 
 
 class LineEditBinding:
-    """Two-way binding between a QLineEdit and a property in the model."""
 
     def __init__(
             self,
@@ -24,8 +23,9 @@ class LineEditBinding:
         self.set_value = set_value
         self.sync_ui = sync_ui
         self._is_refreshing = False
-        self._original_stylesheet = line_edit.styleSheet()
 
+        self._original_stylesheet = line_edit.styleSheet()
+        # Connection is cleaned up automatically when the widget is destroyed
         line_edit.textChanged.connect(self._on_text_changed)
 
         self._push_model_to_view()
@@ -36,10 +36,10 @@ class LineEditBinding:
         self._push_model_to_view()
         self._sync_ui_state()
 
-    def set_error(self, message: str | None) -> None:
-        if message:
+    def set_errors(self, messages: list[str]) -> None:
+        if messages:
             self.line_edit.setStyleSheet(self._original_stylesheet + ERROR_STYLESHEET)
-            self.line_edit.setToolTip(message)
+            self.line_edit.setToolTip("<br>".join(messages))
         else:
             self.line_edit.setStyleSheet(self._original_stylesheet)
             self.line_edit.setToolTip("")

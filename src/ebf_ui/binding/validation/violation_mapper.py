@@ -4,18 +4,18 @@ from ebf_ui.binding.validation.validation_binding import ValidationState
 
 
 class ErrorTarget(Protocol):
-    def set_error(self, message: str | None) -> None: ...
-
+    def set_errors(self, messages: list[str]) -> None: ...
 
 class ViolationMapper:
     def __init__(self, bindings: dict[str, ErrorTarget]):
         self._bindings = bindings
 
     def apply(self, validation: ValidationState) -> None:
-        for binding in self._bindings.values():
-            binding.set_error(None)
+        messages: dict[str, list[str]] = {field: [] for field in self._bindings}
 
         for violation in validation.violations:
-            binding = self._bindings.get(violation.field_name)
-            if binding is not None:
-                binding.set_error(violation.ui_error_message)
+            if violation.field_name in messages:
+                messages[violation.field_name].append(violation.ui_error_message)
+
+        for field, binding in self._bindings.items():
+            binding.set_errors(messages[field])

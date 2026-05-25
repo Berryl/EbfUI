@@ -1,80 +1,82 @@
 from types import SimpleNamespace
 
-from ebf_ui.binding.validation.violation_mapper import ViolationMapper, ErrorTarget
+import pytest
+
+from ebf_ui.binding.validation.validation_binding import ValidationViolation
+from ebf_ui.binding.validation.violation_mapper import ViolationMapper
 
 
 class TestViolationMapper:
-    class TestApply:
 
-        def test_violation_is_bound_to_matching_binding(self):
-            received = []
+    @pytest.fixture
+    def name_missing_violation(self) -> ValidationViolation:
+        return SimpleNamespace(field_name="name", ui_error_message="Name is required")
 
-            class Binding(ErrorTarget):
-                def set_error(self, message: str | None) -> None:
-                    received.append(message)
+    @pytest.fixture
+    def name_too_long_violation(self) -> ValidationViolation:
+        return SimpleNamespace(field_name="name", ui_error_message="Name is too long")
 
-            violation = SimpleNamespace(
-                field_name="name",
-                ui_error_message="Name is required",
-            )
+    @pytest.fixture
+    def email_missing_violation(self) -> ValidationViolation:
+        return SimpleNamespace(field_name="email", ui_error_message="Email is required")
 
-            validation = SimpleNamespace(
-                is_valid=False,
-                violations=[violation],
-            )
+    @pytest.fixture
+    def received(self):
+        return []
 
-            sut = ViolationMapper({
-                "name": Binding(),
-            })
+    @pytest.fixture
+    def sut(self, received) -> ViolationMapper:
+        return ViolationMapper({"name": SimpleNamespace(set_errors=received.append)})
 
-            sut.apply(validation)
+    class TestWhenSingleViolation:
+        class TestWhenBindingMatches:
 
-            assert received == [
-                None,
-                "Name is required",
-            ]
+            def test_violation_is_applied(self, sut, name_missing_violation, received):
+                validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation])
 
-        def test_non_matching_violation_is_ignored(self):
-            received = []
+                sut.apply(validation)
 
-            class Binding(ErrorTarget):
-                def set_error(self, message: str | None) -> None:
-                    received.append(message)
+                assert received == [["Name is required"]]
 
-            violation = SimpleNamespace(
-                field_name="email",
-                ui_error_message="Email is required",
-            )
+        class TestWhenNoBindingMatches:
 
-            validation = SimpleNamespace(
-                is_valid=False,
-                violations=[violation],
-            )
+            def test_violation_is_safely_ignored(self, sut, email_missing_violation, received):
+                validation = SimpleNamespace(is_valid=False, violations=[email_missing_violation])
 
-            sut = ViolationMapper({
-                "name": Binding(),
-            })
+                sut.apply(validation)
 
-            sut.apply(validation)
+                assert received == [[]]
 
-            assert received == [None]
+        class TestUnviolatedBindings:
 
-        def test_clears_previous_error_when_validation_has_no_violations(self):
-            received = []
+            def test_remain_cleared(self, name_missing_violation):
+                name_received = []
+                email_received = []
+                validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation])
+                sut = ViolationMapper({
+                    "name": SimpleNamespace(set_errors=name_received.append),
+                    "email": SimpleNamespace(set_errors=email_received.append),
+                })
 
-            class Binding(ErrorTarget):
-                def set_error(self, message: str | None) -> None:
-                    received.append(message)
+                sut.apply(validation)
 
-            validation = SimpleNamespace(
-                is_valid=True,
-                violations=[],
-            )
+                assert name_received == [["Name is required"]]
+                assert email_received == [[]]
 
-            sut = ViolationMapper({
-                "name": Binding(),
-            })
+    class TestWhenMultipleViolations:
+
+        def test_same_field_are_stacked(self, sut, name_missing_violation, name_too_long_violation, received):
+            validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation, name_too_long_violation])
 
             sut.apply(validation)
 
-            assert received == [None]
+            assert received == [["Name is required", "Name is too long"]]
+
+    class TestWhenNoViolations:
+
+        def test_all_bindings_are_cleared(self, sut, received):
+            validation = SimpleNamespace(is_valid=True, violations=[])
+
+            sut.apply(validation)
+
+            assert received == [[]]

@@ -8,5 +8,5 @@ class FormBinding:
     def refresh(self) -> None:
         for binding in self.bindings:
             refresh = getattr(binding, "refresh", None)
-            if refresh is not None:
+            if callable(refresh):
                 refresh()
