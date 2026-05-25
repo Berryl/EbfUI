@@ -3,8 +3,7 @@ from typing import Callable
 from PySide6.QtWidgets import QLineEdit
 
 from ebf_ui.state.state_tracker import StateTracker
-
-ERROR_STYLESHEET = "QLineEdit { border: 2px solid #e74c3c; }"
+from ebf_ui.widgets.styles import ERROR_STYLESHEET
 
 
 class LineEditBinding:
@@ -23,8 +22,8 @@ class LineEditBinding:
         self.set_value = set_value
         self.sync_ui = sync_ui
         self._is_refreshing = False
-
         self._original_stylesheet = line_edit.styleSheet()
+
         # Connection is cleaned up automatically when the widget is destroyed
         line_edit.textChanged.connect(self._on_text_changed)
 

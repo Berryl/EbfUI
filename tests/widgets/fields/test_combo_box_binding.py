@@ -1,0 +1,134 @@
+from dataclasses import dataclass
+
+import pytest
+from PySide6.QtWidgets import QComboBox
+
+from ebf_ui.state.state_tracker import StateTracker
+from ebf_ui.widgets.fields.combo_box_binding import ComboBoxBinding
+
+
+@dataclass
+class Person:
+    status: str | None
+
+
+ITEMS = ["active", "inactive"]
+
+
+class TestComboBoxBinding:
+
+    @pytest.fixture
+    def person(self):
+        return Person(status="active")
+
+    @pytest.fixture
+    def tracker(self, person):
+        t = StateTracker(person)
+        t.begin_edit()
+        return t
+
+    @pytest.fixture
+    def combo(self, qtbot):
+        c = QComboBox()
+        qtbot.addWidget(c)
+        return c
+
+    @pytest.fixture
+    def binding(self, combo, tracker, person):
+        return ComboBoxBinding(
+            combo_box=combo,
+            tracker=tracker,
+            items=ITEMS,
+            get_value=lambda: person.status,
+            set_value=lambda v: setattr(person, "status", v),
+        )
+
+    class TestItemLoading:
+
+        def test_all_items_are_loaded(self, binding):
+            cbo = binding.combo_box
+            assert cbo.count() == 2
+            assert cbo.itemText(0) == "active"
+            assert cbo.itemText(1) == "inactive"
+
+        def test_get_text_can_format_display(self, combo, tracker, person):
+            binding = ComboBoxBinding(
+                combo_box=combo,
+                tracker=tracker,
+                items=ITEMS,
+                get_value=lambda: person.status,
+                set_value=lambda v: setattr(person, "status", v),
+                get_text=lambda v: v.upper(),
+            )
+
+            cbo = binding.combo_box
+            assert cbo.itemText(0) == "ACTIVE"
+            assert cbo.itemText(1) == "INACTIVE"
+
+    class TestInitialSelection:
+
+        @staticmethod
+        def _bind_person_with_status_of(status: str | None, qtbot) -> ComboBoxBinding:
+            person = Person(status=status)
+            tracker = StateTracker(person)
+            tracker.begin_edit()
+            combo = QComboBox()
+            qtbot.addWidget(combo)
+
+            binding = ComboBoxBinding(
+                combo_box=combo,
+                tracker=tracker,
+                items=ITEMS,
+                get_value=lambda: person.status,
+                set_value=lambda v: setattr(person, "status", v),
+            )
+            return binding
+
+        def test_model_value_is_reflected(self, qtbot):
+            binding = self._bind_person_with_status_of("inactive", qtbot)
+
+            assert binding.combo_box.currentText() == "inactive"
+
+        def test_tracker_is_not_made_dirty(self, binding):
+            assert not binding.tracker.is_dirty
+
+        def test_when_none_value_then_shows_no_selection(self, qtbot):
+            binding = self._bind_person_with_status_of(None, qtbot)
+            assert binding.combo_box.currentIndex() == -1
+
+        def test_when_unknown_value_then_shows_no_selection(self, qtbot):
+            binding = self._bind_person_with_status_of("unknown", qtbot)
+            assert binding.combo_box.currentIndex() == -1
+
+    class TestUserSelection:
+
+        def test_updates_model(self, person, binding):
+            binding.combo_box.setCurrentIndex(1)
+
+            assert person.status == "inactive"
+
+        def test_marks_tracker_dirty(self, tracker, binding):
+            binding.combo_box.setCurrentIndex(1)
+
+            assert tracker.is_dirty
+
+        def test_deselecting_sets_none_on_model(self, person, binding):
+            binding.combo_box.setCurrentIndex(-1)
+
+            assert person.status is None
+
+    class TestRefresh:
+
+        def test_updates_display(self, combo, tracker, person, binding):
+            tracker.cancel_edit()
+            person.status = "inactive"
+            binding.refresh()
+
+            assert combo.currentText() == "inactive"
+
+        def test_does_not_mark_tracker_dirty(self, tracker, person, binding):
+            tracker.cancel_edit()
+            person.status = "inactive"
+            binding.refresh()
+
+            assert not tracker.is_dirty

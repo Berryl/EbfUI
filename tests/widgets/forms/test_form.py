@@ -9,7 +9,8 @@ from ebf_ui.binding.validation.validation_binding import ValidationBinding, bind
 from ebf_ui.binding.validation.violation_mapper import ViolationMapper
 from ebf_ui.state.state_tracker import StateTracker
 from ebf_ui.widgets.fields.button_binding import ButtonBinding
-from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding, ERROR_STYLESHEET
+from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding
+from ebf_ui.widgets.styles import ERROR_STYLESHEET
 
 
 @dataclass
