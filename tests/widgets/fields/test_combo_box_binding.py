@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QComboBox
 
 from ebf_ui.state.state_tracker import StateTracker
 from ebf_ui.widgets.fields.combo_box_binding import ComboBoxBinding
+from ebf_ui.widgets.styles import ERROR_STYLESHEET
 
 
 @dataclass
@@ -67,6 +68,7 @@ class TestComboBoxBinding:
 
     class TestInitialSelection:
 
+        # region helper
         @staticmethod
         def _bind_person_with_status_of(status: str | None, qtbot) -> ComboBoxBinding:
             person = Person(status=status)
@@ -83,6 +85,8 @@ class TestComboBoxBinding:
                 set_value=lambda v: setattr(person, "status", v),
             )
             return binding
+
+        # endregion
 
         def test_model_value_is_reflected(self, qtbot):
             binding = self._bind_person_with_status_of("inactive", qtbot)
@@ -119,16 +123,42 @@ class TestComboBoxBinding:
 
     class TestRefresh:
 
-        def test_updates_display(self, combo, tracker, person, sut):
-            tracker.cancel_edit()
+        def test_updates_display(self, person, sut):
+            sut.tracker.cancel_edit()
             person.status = "inactive"
             sut.refresh()
 
-            assert combo.currentText() == "inactive"
+            assert sut.combo_box.currentText() == "inactive"
 
-        def test_does_not_mark_tracker_dirty(self, tracker, person, sut):
-            tracker.cancel_edit()
+        def test_does_not_mark_tracker_dirty(self, person, sut):
+            sut.tracker.cancel_edit()
             person.status = "inactive"
             sut.refresh()
 
-            assert not tracker.is_dirty
+            assert not sut.tracker.is_dirty
+
+    class TestSetError:
+
+        def test_tooltip_displays_error(self, sut):
+            sut.set_errors(["Name is required"])
+            assert sut.combo_box.toolTip() == "Name is required"
+
+        def test_stylesheet_includes_error_style(self, sut):
+            sut.set_errors(["Name is required"])
+            assert ERROR_STYLESHEET in sut.combo_box.styleSheet()
+
+        def test_tooltip_stacks_multiple_errors(self, sut):
+            sut.set_errors(["Name is required", "Name is too long"])
+            assert sut.combo_box.toolTip() == "Name is required<br>Name is too long"
+
+        class TestWhenNoError:
+
+            def test_tooltip_is_cleared(self, sut):
+                sut.set_errors(["Name is required"])
+                sut.set_errors([])
+                assert sut.combo_box.toolTip() == ""
+
+            def test_stylesheet_is_restored(self, sut):
+                sut.set_errors(["Name is required"])
+                sut.set_errors([])
+                assert ERROR_STYLESHEET not in sut.combo_box.styleSheet()
