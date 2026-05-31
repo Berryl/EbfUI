@@ -1,23 +1,16 @@
 from dataclasses import dataclass
 from types import SimpleNamespace
 
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QLineEdit,
-    QPushButton,
-)
+from PySide6.QtWidgets import QWidget
 
-from ebf_ui.binding.command.command_binding import CommandBinding
-from ebf_ui.binding.validation.validation_binding import (
-    ValidationBinding,
-    bind_validation,
-)
-from ebf_ui.binding.validation.violation_mapper import ViolationMapper
-from ebf_ui.state.state_tracker import StateTracker
-from ebf_ui.widgets.fields.button_binding import ButtonBinding
-from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding
-from ebf_ui.widgets.forms.form_binding import FormBinding
+from .form_binding import FormBinding
+from .ui_sample_form import Ui_personForm
+from ..fields.button_binding import ButtonBinding
+from ..fields.line_edit_binding import LineEditBinding
+from ...binding.command.command_binding import CommandBinding
+from ...binding.validation.validation_binding import ValidationBinding, bind_validation
+from ...binding.validation.violation_mapper import ViolationMapper
+from ...state.state_tracker import StateTracker
 
 
 @dataclass
@@ -30,13 +23,11 @@ class SampleForm(QWidget):
     def __init__(self):
         super().__init__()
 
-        self._build_model()
-        self._build_validation()
+        self.ui = Ui_personForm()
+        self.ui.setupUi(self)
 
-        self._setup_ui()
         self._setup_bindings()
 
-    # region setup
     def _build_model(self) -> None:
         self.person = Person(name="")
 
@@ -45,33 +36,14 @@ class SampleForm(QWidget):
     def _build_validation(self) -> None:
         def validate():
             if self.person.name.strip():
-                return SimpleNamespace(
-                    is_valid=True,
-                    violations=[],
-                )
+                return SimpleNamespace(is_valid=True, violations=[])
 
             return SimpleNamespace(
                 is_valid=False,
-                violations=[
-                    SimpleNamespace(
-                        field_name="name",
-                        ui_error_message="Name is required",
-                    )
-                ],
+                violations=[SimpleNamespace(field_name="name", ui_error_message="Name is required", )],
             )
 
         self.validation = ValidationBinding(validate)
-
-    def _setup_ui(self) -> None:
-        self.setWindowTitle("Sample Form")
-
-        layout = QVBoxLayout(self)
-
-        self.name_line_edit = QLineEdit()
-        self.save_button = QPushButton("Save")
-
-        layout.addWidget(self.name_line_edit)
-        layout.addWidget(self.save_button)
 
     def _setup_bindings(self) -> None:
         bind_validation(self.tracker, self.validation)
@@ -83,7 +55,7 @@ class SampleForm(QWidget):
         )
 
         self.name_binding = LineEditBinding(
-            line_edit=self.name_line_edit,
+            line_edit=self.ui.nameLineEdit,
             tracker=self.tracker,
             get_value=lambda: self.person.name,
             set_value=lambda v: setattr(self.person, "name", v),
@@ -100,7 +72,7 @@ class SampleForm(QWidget):
         self.name_binding.sync_ui = sync_ui
 
         self.save_button_binding = ButtonBinding(
-            button=self.save_button,
+            button=self.ui.saveButton,
             command=self.save_command,
         )
 
@@ -111,7 +83,6 @@ class SampleForm(QWidget):
 
         self.tracker.begin_edit()
 
-    # endregion
 
     def _save(self) -> None:
         print(f"Saved: {self.person.name}")
