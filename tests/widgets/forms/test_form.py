@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 
 import pytest
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton
+from PySide6.QtWidgets import QLineEdit, QPushButton, QVBoxLayout, QWidget
 
 from ebf_ui.binding.command.command_binding import CommandBinding
 from ebf_ui.binding.validation.validation_binding import ValidationBinding, bind_validation
@@ -109,7 +109,6 @@ def form_harness(qtbot) -> SimpleNamespace:
 
 
 class TestWhenModelIsNotValid:
-
     @pytest.mark.parametrize("blank_text", ["", "   ", "\t"])
     def test_save_is_disabled(self, form_harness, blank_text):
         h = form_harness
@@ -125,7 +124,7 @@ class TestWhenModelIsNotValid:
 
 
 class TestWhenModelIsValidAndDirty:
-    """ in this example the name is valid simply if it isn't blank"""
+    """in this example the name is valid simply if it isn't blank"""
 
     def test_save_is_enabled(self, form_harness):
         h = form_harness
@@ -149,7 +148,6 @@ class TestWhenModelIsValidAndDirty:
 
 
 class TestEdgeCases:
-
     def test_refresh_does_not_mark_tracker_dirty(self, qtbot):
         """External model change via refresh() should not mark the tracker dirty."""
         person = Person(name="original")

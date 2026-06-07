@@ -17,10 +17,11 @@ class FakeResult:
 
 
 class TestValidationBinding:
-
     def test_update_exposes_ui_error_messages(self):
         message = "Name: is required"
-        binding = ValidationBinding(lambda: FakeResult(is_valid=False, violations=[FakeViolation(message)]))
+        binding = ValidationBinding(
+            lambda: FakeResult(is_valid=False, violations=[FakeViolation(message)])
+        )
 
         binding.update()
 
@@ -35,7 +36,6 @@ class TestValidationBinding:
         assert binding.ui_error_messages == []
 
     class TestStateTrackerEvents:
-
         def test_begin_edit_triggers_update(self):
             calls = []
 

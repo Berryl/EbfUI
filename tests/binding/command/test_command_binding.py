@@ -7,14 +7,12 @@ from ebf_ui.state.state_tracker import StateTracker
 
 
 class TestCommandBinding:
-
     @pytest.fixture
     def tracker(self) -> StateTracker:
         return StateTracker(SimpleNamespace(name="original"))
 
     class TestIsEnabled:
         class TestWhenDisabled:
-
             def test_when_not_editing(self, tracker):
                 validation = SimpleNamespace(is_valid=True)
 
@@ -157,4 +155,3 @@ class TestCommandBinding:
             sut.execute()
 
             assert received == []
-

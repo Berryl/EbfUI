@@ -4,9 +4,7 @@ from ebf_ui.widgets.forms.form_binding import FormBinding
 
 
 class TestFormBinding:
-
     class TestRefresh:
-
         def test_child_bindings_with_refresh_method_are_called(self):
             calls = []
 

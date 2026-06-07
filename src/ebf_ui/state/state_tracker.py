@@ -2,13 +2,17 @@ from typing import Any
 
 from ebf_core.reflection.attr_reflector import AttributeReflector
 from ebf_core.reflection.attr_selection import select_attrs
-from ebf_core.reflection.snapshot import capture, has_changes, get_changes
-
-from ebf_ui.state.state_events import StateTrackerListener, StateTrackerEvent
+from ebf_core.reflection.snapshot import capture, get_changes, has_changes
+from ebf_ui.state.state_events import StateTrackerEvent, StateTrackerListener
 
 
 class StateTracker:
-    def __init__(self, instance: object, requested_attrs: list[str] | None = None, exclusions: list[str] | None = None):
+    def __init__(
+        self,
+        instance: object,
+        requested_attrs: list[str] | None = None,
+        exclusions: list[str] | None = None,
+    ):
         self.instance = instance
         self.attrs = select_attrs(instance, requested_attrs, exclusions)
         self.original: dict | None = None

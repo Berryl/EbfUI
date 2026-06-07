@@ -3,14 +3,14 @@ from types import SimpleNamespace
 
 from PySide6.QtWidgets import QWidget
 
-from .form_binding import FormBinding
-from .ui_sample_form import Ui_personForm
-from ..fields.button_binding import ButtonBinding
-from ..fields.line_edit_binding import LineEditBinding
 from ...binding.command.command_binding import CommandBinding
 from ...binding.validation.validation_binding import ValidationBinding, bind_validation
 from ...binding.validation.violation_mapper import ViolationMapper
 from ...state.state_tracker import StateTracker
+from ..fields.button_binding import ButtonBinding
+from ..fields.line_edit_binding import LineEditBinding
+from .form_binding import FormBinding
+from .ui_sample_form import Ui_personForm
 
 
 @dataclass
@@ -19,7 +19,6 @@ class Person:
 
 
 class SampleForm(QWidget):
-
     def __init__(self):
         super().__init__()
 
@@ -35,6 +34,7 @@ class SampleForm(QWidget):
     def _build_model(self) -> None:
         self.person = Person(name="")
         self.tracker = StateTracker(self.person)
+
     # endregion
 
     # region build Validation
@@ -45,10 +45,16 @@ class SampleForm(QWidget):
 
             return SimpleNamespace(
                 is_valid=False,
-                violations=[SimpleNamespace(field_name="name", ui_error_message="Name is required", )],
+                violations=[
+                    SimpleNamespace(
+                        field_name="name",
+                        ui_error_message="Name is required",
+                    )
+                ],
             )
 
         self.validation = ValidationBinding(validate)
+
     # endregion
 
     # region setup Bindings
@@ -68,7 +74,11 @@ class SampleForm(QWidget):
             set_value=lambda v: setattr(self.person, "name", v),
         )
 
-        violation_mapper = ViolationMapper({"name": self.name_binding, })
+        violation_mapper = ViolationMapper(
+            {
+                "name": self.name_binding,
+            }
+        )
 
         def sync_ui():
             if self.validation.result is not None:
@@ -81,17 +91,20 @@ class SampleForm(QWidget):
             command=self.save_command_binding,
         )
 
-        self.form = FormBinding([
-            self.name_binding,
-            self.save_button_binding,
-        ])
+        self.form = FormBinding(
+            [
+                self.name_binding,
+                self.save_button_binding,
+            ]
+        )
 
         self.tracker.begin_edit()
+
     # endregion
 
     def _save(self) -> None:
         print(f"Saved: {self.person.name}")
 
-        self.tracker.end_edit() # end edit to clear state
+        self.tracker.end_edit()  # end edit to clear state
         self.tracker.begin_edit()
         self.form.refresh()

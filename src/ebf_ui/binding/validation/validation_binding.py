@@ -1,5 +1,4 @@
-from typing import Callable
-from typing import Protocol
+from typing import Callable, Protocol
 
 from ebf_ui.state.state_events import StateTrackerEvent
 from ebf_ui.state.state_tracker import StateTracker

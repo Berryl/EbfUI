@@ -20,13 +20,10 @@ def sut(obj) -> StateTracker:
 
 
 class TestStateTracker:
-
     def test_begin_edit_captures_original_state(self, sut: StateTracker):
         sut.begin_edit()
 
-        assert sut.original == {
-            "name": "original"
-        }
+        assert sut.original == {"name": "original"}
 
     def test_is_dirty_is_false_immediately_after_begin_edit(self, sut: StateTracker):
         sut.begin_edit()
@@ -52,9 +49,7 @@ class TestStateTracker:
         obj.name = "updated"
         sut.update_edit()
 
-        assert sut.changes == {
-            "name": ("original", "updated")
-        }
+        assert sut.changes == {"name": ("original", "updated")}
 
     def test_end_edit_clears_state(self, sut: StateTracker):
         sut.begin_edit()
@@ -88,9 +83,7 @@ class TestStateTracker:
             obj.extra = "ignored"
             sut.update_edit()
 
-            assert sut.changes == {
-                "name": ("original", "updated")
-            }
+            assert sut.changes == {"name": ("original", "updated")}
 
         def test_exclusions_remove_attrs_from_tracking_scope(self, obj: MyClass):
             obj.value = 42
@@ -138,9 +131,7 @@ class TestStateTracker:
             obj.parent.name = "updated"
             sut.update_edit()
 
-            assert sut.changes == {
-                "parent.name": ("original", "updated")
-            }
+            assert sut.changes == {"parent.name": ("original", "updated")}
 
     class TestRestoreOnCancel:
         def test_cancel_edit_restores_original_values(self, sut: StateTracker, obj: MyClass):
@@ -163,7 +154,9 @@ class TestStateTracker:
 
             assert obj.name == "updated"
 
-        def test_cancel_without_changes_leaves_instance_unchanged(self, sut: StateTracker, obj: MyClass):
+        def test_cancel_without_changes_leaves_instance_unchanged(
+            self, sut: StateTracker, obj: MyClass
+        ):
             sut.begin_edit()
             sut.cancel_edit()
 
@@ -190,7 +183,6 @@ class TestStateTracker:
             assert child.parent.name == "original"
 
     class TestListeners:
-
         def test_begin_edit(self, sut: StateTracker):
             received = []
             sut.listeners.append(received.append)
@@ -199,7 +191,9 @@ class TestStateTracker:
 
             assert received == [StateTrackerEvent.BEGIN_EDIT]
 
-        def test_update_edit_notifies_dirty_changed_when_dirty_state_changes(self, sut: StateTracker, obj: MyClass):
+        def test_update_edit_notifies_dirty_changed_when_dirty_state_changes(
+            self, sut: StateTracker, obj: MyClass
+        ):
             received = []
             sut.listeners.append(received.append)
 
@@ -214,7 +208,7 @@ class TestStateTracker:
             ]
 
         def test_update_edit_does_not_notify_dirty_changed_when_dirty_state_does_not_change(
-                self, sut: StateTracker, obj: MyClass
+            self, sut: StateTracker, obj: MyClass
         ):
             received = []
             sut.listeners.append(received.append)
@@ -232,7 +226,7 @@ class TestStateTracker:
             ]
 
         def test_update_edit_notifies_dirty_changed_when_dirty_state_returns_to_clean(
-                self, sut: StateTracker, obj: MyClass
+            self, sut: StateTracker, obj: MyClass
         ):
             received = []
             sut.listeners.append(received.append)

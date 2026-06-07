@@ -7,7 +7,6 @@ from ebf_ui.binding.validation.violation_mapper import ViolationMapper
 
 
 class TestViolationMapper:
-
     # region fixtures
     @pytest.fixture
     def name_missing_violation(self) -> ValidationViolation:
@@ -33,7 +32,6 @@ class TestViolationMapper:
 
     class TestWhenSingleViolation:
         class TestWhenBindingMatches:
-
             def test_violation_is_applied(self, sut, name_missing_violation, received):
                 validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation])
 
@@ -42,7 +40,6 @@ class TestViolationMapper:
                 assert received == [["Name is required"]]
 
         class TestWhenNoBindingMatches:
-
             def test_violation_is_safely_ignored(self, sut, email_missing_violation, received):
                 validation = SimpleNamespace(is_valid=False, violations=[email_missing_violation])
 
@@ -51,16 +48,18 @@ class TestViolationMapper:
                 assert received == [[]]
 
     class TestWhenMultipleViolations:
-
-        def test_same_field_are_stacked(self, sut, name_missing_violation, name_too_long_violation, received):
-            validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation, name_too_long_violation])
+        def test_same_field_are_stacked(
+            self, sut, name_missing_violation, name_too_long_violation, received
+        ):
+            validation = SimpleNamespace(
+                is_valid=False, violations=[name_missing_violation, name_too_long_violation]
+            )
 
             sut.apply(validation)
 
             assert received == [["Name is required", "Name is too long"]]
 
     class TestWhenNoViolations:
-
         def test_all_bindings_are_cleared(self, sut, received):
             validation = SimpleNamespace(is_valid=True, violations=[])
 
@@ -69,15 +68,16 @@ class TestViolationMapper:
             assert received == [[]]
 
     class TestWhenMultipleBindingsAndSingleViolation:
-
         def test_unviolated_bindings_remain_cleared(self, name_missing_violation):
             name_received = []
             email_received = []
             validation = SimpleNamespace(is_valid=False, violations=[name_missing_violation])
-            sut = ViolationMapper({
-                "name": SimpleNamespace(set_errors=name_received.append),
-                "email": SimpleNamespace(set_errors=email_received.append),
-            })
+            sut = ViolationMapper(
+                {
+                    "name": SimpleNamespace(set_errors=name_received.append),
+                    "email": SimpleNamespace(set_errors=email_received.append),
+                }
+            )
 
             sut.apply(validation)
 

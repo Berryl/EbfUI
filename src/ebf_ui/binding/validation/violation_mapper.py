@@ -6,6 +6,7 @@ from ebf_ui.binding.validation.validation_binding import ValidationState
 class ErrorTarget(Protocol):
     def set_errors(self, messages: list[str]) -> None: ...
 
+
 class ViolationMapper:
     def __init__(self, bindings: dict[str, ErrorTarget]):
         self._bindings = bindings

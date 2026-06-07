@@ -9,4 +9,5 @@ class StateTrackerEvent(StrEnum):
     END_EDIT = auto()
     DIRTY_CHANGED = auto()
 
+
 type StateTrackerListener = Callable[[StateTrackerEvent], None]

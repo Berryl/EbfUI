@@ -15,7 +15,9 @@ type CommandBindingListener = Callable[[CommandBindingEvent], None]
 
 
 class CommandBinding:
-    def __init__(self, tracker: StateTracker, validation: ValidationState, execute: Callable[[], None]):
+    def __init__(
+        self, tracker: StateTracker, validation: ValidationState, execute: Callable[[], None]
+    ):
         self.tracker = tracker
         self.validation = validation
         self._execute = execute
@@ -33,11 +35,7 @@ class CommandBinding:
 
     @property
     def is_enabled(self) -> bool:
-        return (
-                self.tracker.is_editing
-                and self.tracker.is_dirty
-                and self.validation.is_valid
-        )
+        return self.tracker.is_editing and self.tracker.is_dirty and self.validation.is_valid
 
     def _on_state_changed(self, _: StateTrackerEvent) -> None:
         was_enabled = self._was_enabled

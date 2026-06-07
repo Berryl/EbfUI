@@ -7,14 +7,13 @@ from ebf_ui.widgets.styles import ERROR_STYLESHEET
 
 
 class LineEditBinding:
-
     def __init__(
-            self,
-            line_edit: QLineEdit,
-            tracker: StateTracker,
-            get_value: Callable[[], str | None],
-            set_value: Callable[[str], None],
-            sync_ui: Callable[[], None] | None = None,
+        self,
+        line_edit: QLineEdit,
+        tracker: StateTracker,
+        get_value: Callable[[], str | None],
+        set_value: Callable[[str], None],
+        sync_ui: Callable[[], None] | None = None,
     ):
         self.line_edit = line_edit
         self.tracker = tracker

@@ -17,7 +17,6 @@ ITEMS = ["active", "inactive"]
 
 
 class TestComboBoxBinding:
-
     @pytest.fixture
     def person(self):
         return Person(status="active")
@@ -45,7 +44,6 @@ class TestComboBoxBinding:
         )
 
     class TestItemLoading:
-
         def test_all_items_are_loaded(self, sut):
             cbo = sut.combo_box
             assert cbo.count() == 2
@@ -67,7 +65,6 @@ class TestComboBoxBinding:
             assert cbo.itemText(1) == "INACTIVE"
 
     class TestInitialSelection:
-
         # region helper
         @staticmethod
         def _bind_person_with_status_of(status: str | None, qtbot) -> ComboBoxBinding:
@@ -105,7 +102,6 @@ class TestComboBoxBinding:
             assert binding.combo_box.currentIndex() == -1
 
     class TestUserSelection:
-
         def test_updates_model(self, person, sut):
             sut.combo_box.setCurrentIndex(1)
 
@@ -122,7 +118,6 @@ class TestComboBoxBinding:
             assert person.status is None
 
     class TestRefresh:
-
         def test_updates_display(self, person, sut):
             sut.tracker.cancel_edit()
             person.status = "inactive"
@@ -138,7 +133,6 @@ class TestComboBoxBinding:
             assert not sut.tracker.is_dirty
 
     class TestSetErrors:
-
         class TestWhenErrors:
             def test_tooltip_displays_error(self, sut):
                 sut.set_errors(["Status is required"])
@@ -153,7 +147,6 @@ class TestComboBoxBinding:
                 assert sut.combo_box.toolTip() == "Status is required<br>Status is too long"
 
         class TestWhenNoErrors:
-
             def test_tooltip_is_cleared(self, sut):
                 sut.set_errors(["Status is required"])
                 sut.set_errors([])
