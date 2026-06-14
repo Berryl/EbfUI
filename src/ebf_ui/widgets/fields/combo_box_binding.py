@@ -3,19 +3,19 @@ from collections.abc import Callable, Sequence
 from PySide6.QtWidgets import QComboBox
 
 from ebf_ui.state.state_tracker import StateTracker
-from ebf_ui.widgets.styles import ERROR_STYLESHEET
+from ebf_ui.widgets.styles import apply_errors
 
 
 class ComboBoxBinding[T]:
     def __init__(
-        self,
-        combo_box: QComboBox,
-        tracker: StateTracker,
-        items: Sequence[T],
-        get_value: Callable[[], T | None],
-        set_value: Callable[[T | None], None],
-        get_text: Callable[[T], str] = str,
-        sync_ui: Callable[[], None] | None = None,
+            self,
+            combo_box: QComboBox,
+            tracker: StateTracker,
+            items: Sequence[T],
+            get_value: Callable[[], T | None],
+            set_value: Callable[[T | None], None],
+            get_text: Callable[[T], str] = str,
+            sync_ui: Callable[[], None] | None = None,
     ):
         self.combo_box = combo_box
         self.tracker = tracker
@@ -39,12 +39,7 @@ class ComboBoxBinding[T]:
         self._sync_ui_state()
 
     def set_errors(self, messages: list[str]) -> None:
-        if messages:
-            self.combo_box.setStyleSheet(self._original_stylesheet + ERROR_STYLESHEET)
-            self.combo_box.setToolTip("<br>".join(messages))
-        else:
-            self.combo_box.setStyleSheet(self._original_stylesheet)
-            self.combo_box.setToolTip("")
+        apply_errors(self.combo_box, self._original_stylesheet, messages)
 
     def _load_items(self) -> None:
         self.combo_box.clear()

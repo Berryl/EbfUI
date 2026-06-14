@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QComboBox
 
 from ebf_ui.state.state_tracker import StateTracker
 from ebf_ui.widgets.fields.combo_box_binding import ComboBoxBinding
-from ebf_ui.widgets.styles import ERROR_STYLESHEET
+from ebf_ui.widgets.styles import ERROR_BORDER_STYLESHEET
 
 
 @dataclass
@@ -140,7 +140,7 @@ class TestComboBoxBinding:
 
             def test_stylesheet_includes_error_style(self, sut):
                 sut.set_errors(["Status is required"])
-                assert ERROR_STYLESHEET in sut.combo_box.styleSheet()
+                assert ERROR_BORDER_STYLESHEET in sut.combo_box.styleSheet()
 
             def test_tooltip_stacks_multiple_errors(self, sut):
                 sut.set_errors(["Status is required", "Status is too long"])
@@ -155,4 +155,4 @@ class TestComboBoxBinding:
             def test_stylesheet_is_restored(self, sut):
                 sut.set_errors(["Status is required"])
                 sut.set_errors([])
-                assert ERROR_STYLESHEET not in sut.combo_box.styleSheet()
+                assert ERROR_BORDER_STYLESHEET not in sut.combo_box.styleSheet()

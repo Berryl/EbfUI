@@ -3,17 +3,17 @@ from typing import Callable
 from PySide6.QtWidgets import QLineEdit
 
 from ebf_ui.state.state_tracker import StateTracker
-from ebf_ui.widgets.styles import ERROR_STYLESHEET
+from ebf_ui.widgets.styles import apply_errors
 
 
 class LineEditBinding:
     def __init__(
-        self,
-        line_edit: QLineEdit,
-        tracker: StateTracker,
-        get_value: Callable[[], str | None],
-        set_value: Callable[[str], None],
-        sync_ui: Callable[[], None] | None = None,
+            self,
+            line_edit: QLineEdit,
+            tracker: StateTracker,
+            get_value: Callable[[], str | None],
+            set_value: Callable[[str], None],
+            sync_ui: Callable[[], None] | None = None,
     ):
         self.line_edit = line_edit
         self.tracker = tracker
@@ -35,12 +35,7 @@ class LineEditBinding:
         self._sync_ui_state()
 
     def set_errors(self, messages: list[str]) -> None:
-        if messages:
-            self.line_edit.setStyleSheet(self._original_stylesheet + ERROR_STYLESHEET)
-            self.line_edit.setToolTip("<br>".join(messages))
-        else:
-            self.line_edit.setStyleSheet(self._original_stylesheet)
-            self.line_edit.setToolTip("")
+        apply_errors(self.line_edit, self._original_stylesheet, messages)
 
     def _on_text_changed(self, text: str) -> None:
         """Called when the user types in the line edit."""

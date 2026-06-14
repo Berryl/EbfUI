@@ -11,7 +11,7 @@ from ebf_ui.state.state_tracker import StateTracker
 from ebf_ui.widgets.fields.button_binding import ButtonBinding
 from ebf_ui.widgets.fields.line_edit_binding import LineEditBinding
 from ebf_ui.widgets.forms.form_binding import FormBinding
-from ebf_ui.widgets.styles import ERROR_STYLESHEET
+from ebf_ui.widgets.styles import ERROR_BORDER_STYLESHEET
 
 
 @dataclass
@@ -201,7 +201,7 @@ class TestSetError:
         def test_stylesheet_includes_error_style(self, form_harness):
             form_harness.name_binding.set_errors(["Name is required"])
 
-            assert ERROR_STYLESHEET in form_harness.line_edit.styleSheet()
+            assert ERROR_BORDER_STYLESHEET in form_harness.line_edit.styleSheet()
 
         def test_tooltip_stacks_multiple_errors(self, form_harness):
             form_harness.name_binding.set_errors(["Name is required", "Name is too long"])
@@ -219,4 +219,4 @@ class TestSetError:
             form_harness.name_binding.set_errors(["Name is required"])
             form_harness.name_binding.set_errors([])
 
-            assert ERROR_STYLESHEET not in form_harness.line_edit.styleSheet()
+            assert ERROR_BORDER_STYLESHEET not in form_harness.line_edit.styleSheet()
