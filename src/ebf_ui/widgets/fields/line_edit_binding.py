@@ -35,7 +35,7 @@ class LineEditBinding:
         self._sync_ui_state()
 
     def set_errors(self, messages: list[str]) -> None:
-        apply_errors(self.line_edit, self._original_stylesheet, messages)
+        apply_errors(self.line_edit, messages)
 
     def _on_text_changed(self, text: str) -> None:
         """Called when the user types in the line edit."""

@@ -39,7 +39,7 @@ class ComboBoxBinding[T]:
         self._sync_ui_state()
 
     def set_errors(self, messages: list[str]) -> None:
-        apply_errors(self.combo_box, self._original_stylesheet, messages)
+        apply_errors(self.combo_box, messages)
 
     def _load_items(self) -> None:
         self.combo_box.clear()
