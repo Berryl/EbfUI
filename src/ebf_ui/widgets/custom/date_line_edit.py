@@ -24,14 +24,6 @@ class DateLineEdit(QLineEdit):
         "+" — increment the current date by one day (falls back to today if no current date)
         "-" — decrement the current date by one day (falls back to today if no current date)
         "Alt+↓" — open the calendar popup
-
-    Flex parsing:
-        see parse_flex_datetime.
-
-    Calendar popup:
-        A frameless QCalendarWidget drops below the widget. It initializes
-        to the currently parsed date when the field holds a valid value, otherwise
-        to today.  Clicking a date fills the field and closes the popup.
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:
