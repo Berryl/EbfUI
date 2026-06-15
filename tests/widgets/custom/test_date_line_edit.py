@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import pytest
 from PySide6.QtCore import Qt, QDate
 from PySide6.QtTest import QSignalSpy
+from PySide6.QtWidgets import QCalendarWidget
 
 from ebf_ui.widgets.custom.date_line_edit import DateLineEdit
 
@@ -139,3 +140,35 @@ class TestDateLineEdit:
             sut._on_date_selected(QDate(2026, 6, 20))
 
             assert _signal_count(spy) == 1
+
+    class TestCalendarPopup:
+
+        def test_alt_down_opens_popup(self, sut, qtbot):
+            qtbot.keyClick(sut, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.AltModifier)
+
+            assert sut._popup is not None
+            assert sut._popup.findChild(QCalendarWidget) is not None
+
+        def test_alt_down_when_popup_is_open_closes_popup(self, sut, qtbot):
+            qtbot.keyClick(sut, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.AltModifier)
+            assert sut._popup is not None
+
+            qtbot.keyClick(sut, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.AltModifier)
+
+            assert sut._popup is None
+
+        def test_popup_initializes_from_current_value(self, sut):
+            sut.setText(SOME_DATE_STRING)
+
+            sut._show_calendar_popup()
+
+            calendar = sut._popup.findChild(QCalendarWidget)
+            assert calendar.selectedDate() == QDate(2026, 6, 15)
+
+        def test_calendar_selection_sets_text_and_closes_popup(self, sut, qtbot):
+            sut._show_calendar_popup()
+
+            sut._on_date_selected(QDate(2026, 6, 20))
+
+            assert sut.text() == "Jun-20 2026"
+            qtbot.waitUntil(lambda: sut._popup is None)

@@ -13,8 +13,6 @@ from PySide6.QtWidgets import (
 from ebf_core.date_time.parsers import parse_flex_datetime
 
 
-
-
 class DateLineEdit(QLineEdit):
     """A QLineEdit with date-aware keyboard shortcuts, flex parsing, and a
     calendar popup.
@@ -107,7 +105,9 @@ class DateLineEdit(QLineEdit):
         self._set_date(date(q_date.year(), q_date.month(), q_date.day()))
         self.editingFinished.emit()
         if self._popup is not None:
-            self._popup.close()
+            popup = self._popup
+            self._popup = None
+            popup.close()
 
     def _on_popup_destroyed(self) -> None:
         self._popup = None
