@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+import pandas as pd
 from PySide6.QtCore import QDate, Qt
 from PySide6.QtGui import QKeyEvent, QFocusEvent
 from PySide6.QtWidgets import (
@@ -127,6 +128,10 @@ class DateLineEdit(QLineEdit):
         text = self.text().strip()
         if not text:
             return None
+        try:
+            return pd.to_datetime(text).date()
+        except (ValueError, pd.errors.ParserError):
+            pass
         try:
             return parse_flex_datetime(text).date()
         except ValueError:
