@@ -1,9 +1,8 @@
-# Option 1 — universal selector, one constant
 from PySide6.QtWidgets import QWidget
 
-ERROR_BORDER_STYLESHEET = "* { border: 2px solid #e74c3c; }"
+# region Errors
+ERROR_BORDER_STYLESHEET = "* { border: 2px solid #e74c3c; }"  # universal selector
 
-# Option 2 — widget-specific constants
 LINE_EDIT_ERROR_BORDER_STYLESHEET = "QLineEdit { border: 2px solid #e74c3c; }"
 COMBO_BOX_ERROR_BORDER_STYLESHEET = "QComboBox { border: 2px solid #e74c3c; }"
 
@@ -22,3 +21,9 @@ def apply_errors(widget: QWidget, messages: list[str]) -> None:
     else:
         widget.setStyleSheet(original)
         widget.setToolTip("")
+# endregion
+
+# region Dates
+DATE_FORMAT_QT = "yyyy-MM-dd"       # Qt format string
+DATE_FORMAT_PY = "%Y-%m-%d"         # Python equivalent
+# endregion
