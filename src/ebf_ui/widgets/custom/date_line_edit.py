@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 from ebf_core.date_time.parsers import parse_flex_datetime
 
-from ebf_ui.widgets.styles import DATE_FORMAT_PY
+
 
 
 class DateLineEdit(QLineEdit):
@@ -36,7 +36,7 @@ class DateLineEdit(QLineEdit):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setPlaceholderText("YYYY-MM-DD  or  t  /  +  /  -  /  Alt+↓")
+        self.setPlaceholderText("Jun-15 2026  or  t  /  +  /  -  /  Alt+↓")
         self._popup: QFrame | None = None
 
     # region Public interface
@@ -129,16 +129,16 @@ class DateLineEdit(QLineEdit):
         if not text:
             return None
         try:
-            return pd.to_datetime(text).date()
-        except (ValueError, pd.errors.ParserError):
-            pass
-        try:
             return parse_flex_datetime(text).date()
         except ValueError:
+            pass
+        try:
+            return pd.to_datetime(text).date()
+        except (ValueError, pd.errors.ParserError):
             return None
 
     def _set_date(self, d: date) -> None:
-        self.setText(d.strftime(DATE_FORMAT_PY))
+        self.setText(f"{d.strftime('%b')}-{d.day} {d.year}")
 
     def _try_reformat(self) -> None:
         parsed = self._parse_current_text()

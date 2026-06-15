@@ -24,6 +24,5 @@ def apply_errors(widget: QWidget, messages: list[str]) -> None:
 # endregion
 
 # region Dates
-DATE_FORMAT_PY =  "%m-%d-%Y"     # e.g. 06-15-2026
 DATE_FORMAT_QT = "MM-dd-yyyy"    # Qt format string
 # endregion
