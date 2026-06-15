@@ -25,7 +25,10 @@ class TestDateLineEdit:
 
     class TestGetDate:
 
-        @pytest.mark.parametrize("raw", [None, "", "blah"])
+        def test_returns_none_when_no_text(self, sut):
+            assert sut.get_date() is None
+
+        @pytest.mark.parametrize("raw", ["  ", "", "blah"])
         def test_returns_none_when_text_is_empty_or_unparseable(self, sut, raw):
             sut.setText(raw)
             assert sut.get_date() is None
@@ -61,7 +64,7 @@ class TestDateLineEdit:
             def test_decrements_current_date(self, sut, qtbot):
                 sut.setText(SOME_DATE_STRING)
                 qtbot.keyClick(sut, Qt.Key.Key_Minus)
-                assert sut.text() == _fmt(date.today() - timedelta(days=1))
+                assert sut.text() == _fmt(SOME_DATE - timedelta(days=1))
 
             def test_minus_falls_back_to_today_when_empty(self, sut, qtbot):
                 qtbot.keyClick(sut, Qt.Key.Key_Minus)

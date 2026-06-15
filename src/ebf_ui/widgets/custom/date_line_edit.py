@@ -126,7 +126,7 @@ class DateLineEdit(QLineEdit):
             pass
         try:
             return pd.to_datetime(text).date()
-        except (ValueError, pd.errors.ParserError):
+        except (ValueError, TypeError, pd.errors.ParserError):
             return None
 
     def _set_date(self, d: date) -> None:
