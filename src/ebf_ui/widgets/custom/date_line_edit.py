@@ -54,12 +54,14 @@ class DateLineEdit(QLineEdit):
 
         if text == "t":
             self._set_date(date.today())
+            self.editingFinished.emit()
             return
 
         if text in ("+", "-"):
             current = self._parse_current_text() or date.today()
             delta = 1 if text == "+" else -1
             self._set_date(self._offset_date(current, delta))
+            self.editingFinished.emit()
             return
 
         if key == Qt.Key.Key_Down and event.modifiers() & Qt.KeyboardModifier.AltModifier:
@@ -110,6 +112,7 @@ class DateLineEdit(QLineEdit):
 
     def _on_date_selected(self, q_date: QDate) -> None:
         self._set_date(date(q_date.year(), q_date.month(), q_date.day()))
+        self.editingFinished.emit()
         if self._popup is not None:
             self._popup.close()
 
@@ -131,7 +134,6 @@ class DateLineEdit(QLineEdit):
 
     def _set_date(self, d: date) -> None:
         self.setText(d.strftime(DATE_FORMAT_PY))
-        self.editingFinished.emit()
 
     def _try_reformat(self) -> None:
         parsed = self._parse_current_text()
