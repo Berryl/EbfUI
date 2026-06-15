@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 
 import pytest
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QDate
+from PySide6.QtTest import QSignalSpy
 
 from ebf_ui.widgets.custom.date_line_edit import DateLineEdit
 
@@ -9,6 +10,10 @@ from ebf_ui.widgets.custom.date_line_edit import DateLineEdit
 def _fmt(d: date) -> str:
     """Canonical display format: e.g. 'Jun-5 2026'"""
     return f"{d.strftime('%b')}-{d.day} {d.year}"
+
+
+def _signal_count(spy: QSignalSpy) -> int:
+    return spy.count() if hasattr(spy, "count") else len(spy)
 
 
 SOME_DATE_STRING = "Jun-15 2026"
@@ -95,3 +100,42 @@ class TestDateLineEdit:
             sut.setText("Jun-5 2027")
             sut._try_reformat()
             assert sut.text() == "Jun-5 2027"
+
+    class TestEditingFinished:
+
+        def test_t_emits_once(self, sut, qtbot):
+            spy = QSignalSpy(sut.editingFinished)
+
+            qtbot.keyClick(sut, Qt.Key.Key_T)
+
+            assert _signal_count(spy) == 1
+
+        def test_plus_emits_once(self, sut, qtbot):
+            spy = QSignalSpy(sut.editingFinished)
+
+            qtbot.keyClick(sut, Qt.Key.Key_Plus)
+
+            assert _signal_count(spy) == 1
+
+        def test_minus_emits_once(self, sut, qtbot):
+            spy = QSignalSpy(sut.editingFinished)
+
+            qtbot.keyClick(sut, Qt.Key.Key_Minus)
+
+            assert _signal_count(spy) == 1
+
+        def test_enter_emits_once(self, sut, qtbot):
+            sut.setText(SOME_DATE_STRING)
+            spy = QSignalSpy(sut.editingFinished)
+
+            qtbot.keyClick(sut, Qt.Key.Key_Return)
+
+            assert _signal_count(spy) == 1
+
+        def test_calendar_selection_emits_once(self, sut):
+            sut._show_calendar_popup()
+            spy = QSignalSpy(sut.editingFinished)
+
+            sut._on_date_selected(QDate(2026, 6, 20))
+
+            assert _signal_count(spy) == 1
