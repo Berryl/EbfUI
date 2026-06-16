@@ -5,12 +5,12 @@ from PySide6.QtCore import QDate, Qt
 from PySide6.QtGui import QKeyEvent, QFocusEvent
 from PySide6.QtWidgets import (
     QCalendarWidget,
-    QFrame,
     QLineEdit,
-    QVBoxLayout,
-    QWidget,
+    QWidget, QDialog,
 )
 from ebf_core.date_time.parsers import parse_flex_datetime
+
+from ebf_ui.widgets.custom.utils import show_popup
 
 
 class DateLineEdit(QLineEdit):
@@ -27,7 +27,7 @@ class DateLineEdit(QLineEdit):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setPlaceholderText("Jun-15 2026  or  t  /  +  /  -  /  Alt+↓")
-        self._popup: QFrame | None = None
+        self._popup: QDialog | None = None
 
     # region Public interface
 
@@ -80,25 +80,20 @@ class DateLineEdit(QLineEdit):
             self._popup = None
             return
 
-        popup = QFrame(self.window(), Qt.WindowType.Popup)
-        popup.setFrameShape(QFrame.Shape.StyledPanel)
-
-        calendar = QCalendarWidget(popup)
+        calendar = QCalendarWidget()
         calendar.setGridVisible(True)
 
         initial = self._parse_current_text() or date.today()
         calendar.setSelectedDate(QDate(initial.year, initial.month, initial.day))
 
-        layout = QVBoxLayout(popup)
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.addWidget(calendar)
-
         calendar.activated.connect(self._on_date_selected)
-        popup.destroyed.connect(self._on_popup_destroyed)
 
-        global_pos = self.mapToGlobal(self.rect().bottomLeft())
-        popup.move(global_pos)
-        popup.show()
+        popup = show_popup(
+            anchor=self,
+            widget=calendar,
+        )
+
+        popup.destroyed.connect(self._on_popup_destroyed)
         self._popup = popup
 
     def _on_date_selected(self, q_date: QDate) -> None:
