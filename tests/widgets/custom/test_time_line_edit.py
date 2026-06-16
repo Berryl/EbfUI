@@ -50,6 +50,7 @@ class TestTimeLineEdit:
                 before = datetime.now().time().replace(microsecond=0)
                 qtbot.keyClick(sut, Qt.Key.Key_N)
                 after = datetime.now().time().replace(microsecond=0)
+
                 result = sut.get_time()
                 assert before <= result <= after
 
