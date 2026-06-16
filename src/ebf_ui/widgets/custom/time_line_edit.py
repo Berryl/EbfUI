@@ -4,14 +4,15 @@ import pandas as pd
 from PySide6.QtCore import Qt, QTime
 from PySide6.QtGui import QKeyEvent, QFocusEvent
 from PySide6.QtWidgets import (
-    QFrame,
+    QDialog,
     QLineEdit,
     QTimeEdit,
-    QVBoxLayout,
     QWidget,
 )
 
-from ebf_ui.widgets.styles import TIME_FORMAT_PY
+from ebf_ui.widgets.custom.utils import show_popup
+
+TIME_FORMAT_PY = "%I:%M:%S %p"   # e.g., 09:30:00 AM
 
 
 class TimeLineEdit(QLineEdit):
@@ -29,7 +30,7 @@ class TimeLineEdit(QLineEdit):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setPlaceholderText("09:30:00 AM  or  n  /  +  /  -  /  Alt+↓")
-        self._popup: QFrame | None = None
+        self._popup: QDialog | None = None
 
     # region Public interface
 
@@ -91,25 +92,16 @@ class TimeLineEdit(QLineEdit):
             self._popup = None
             return
 
-        popup = QFrame(self.window(), Qt.WindowType.Popup)
-        popup.setFrameShape(QFrame.Shape.StyledPanel)
-
-        time_edit = QTimeEdit(popup)
+        time_edit = QTimeEdit()
         time_edit.setDisplayFormat("hh:mm:ss AP")
 
         initial = self._parse_current_text() or datetime.now().time()
         time_edit.setTime(QTime(initial.hour, initial.minute, initial.second))
 
-        layout = QVBoxLayout(popup)
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.addWidget(time_edit)
-
         time_edit.timeChanged.connect(self._on_time_selected)
-        popup.destroyed.connect(self._on_popup_destroyed)
 
-        global_pos = self.mapToGlobal(self.rect().bottomLeft())
-        popup.move(global_pos)
-        popup.show()
+        popup = show_popup(anchor=self, widget=time_edit)
+        popup.destroyed.connect(self._on_popup_destroyed)
         self._popup = popup
 
     def _on_time_selected(self, q_time: QTime) -> None:
