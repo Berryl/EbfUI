@@ -4,6 +4,7 @@ import pytest
 from PySide6.QtCore import Qt, QTime
 from PySide6.QtTest import QSignalSpy
 from PySide6.QtWidgets import QTimeEdit
+from ebf_core.date_time.testing_helpers import is_effectively_now
 
 from ebf_ui.widgets.custom.time_line_edit import TimeLineEdit
 
@@ -46,13 +47,11 @@ class TestTimeLineEdit:
     class TestKeyboardShortcuts:
         class TestNowWith_n:
 
-            def test_fills_current_time(self, sut, qtbot):
-                before = datetime.now().time().replace(microsecond=0)
+            def test_fills_with_current_time(self, sut, qtbot):
                 qtbot.keyClick(sut, Qt.Key.Key_N)
-                after = datetime.now().time().replace(microsecond=0)
 
                 result = sut.get_time()
-                assert before <= result <= after
+                assert is_effectively_now(result)
 
         class TestIncrementingWith_plus:
 
@@ -169,7 +168,10 @@ class TestTimeLineEdit:
             spinner = sut._popup.findChild(QTimeEdit)
             assert spinner.time() == QTime(9, 30, 0)
 
-        def test_spinner_selection_sets_text(self, sut):
+        def test_spinner_selection_sets_text_and_closes_popup(self, sut):
             sut._show_time_popup()
+
             sut._on_time_selected(QTime(14, 30, 0))
+
             assert sut.text() == "02:30:00 PM"
+            assert sut._popup is None

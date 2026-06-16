@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 
 from ebf_ui.widgets.custom.utils import show_popup
 
-TIME_FORMAT_PY = "%I:%M:%S %p"   # e.g., 09:30:00 AM
+TIME_FORMAT_PY = "%I:%M:%S %p"  # e.g., 09:30:00 AM
 
 
 class TimeLineEdit(QLineEdit):
@@ -107,6 +107,10 @@ class TimeLineEdit(QLineEdit):
     def _on_time_selected(self, q_time: QTime) -> None:
         self._set_time(time(q_time.hour(), q_time.minute(), q_time.second()))
         self.editingFinished.emit()
+        if self._popup is not None:
+            popup = self._popup
+            self._popup = None
+            popup.close()
 
     def _on_popup_destroyed(self) -> None:
         self._popup = None
