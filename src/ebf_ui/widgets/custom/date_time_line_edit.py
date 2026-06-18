@@ -14,11 +14,14 @@ from PySide6.QtWidgets import (
 from ebf_ui.widgets.custom.utils import show_popup
 
 
+def _format_date(d: date) -> str:
+    """Canonical date display format: e.g. 'Jun-15 2026'"""
+    return f"{d.strftime('%b')}-{d.day} {d.year}"
+
+
 def _format_datetime(dt: datetime) -> str:
-    """Canonical display format: e.g. 'Jun-15 2026 09:30:00 AM'"""
-    date_part = f"{dt.strftime('%b')}-{dt.day} {dt.year}"
-    time_part = dt.strftime("%I:%M:%S %p")
-    return f"{date_part} {time_part}"
+    """Canonical datetime display format: e.g. 'Jun-15 2026 09:30:00 AM'"""
+    return f"{_format_date(dt.date())} {dt.strftime('%I:%M:%S %p')}"
 
 
 class DateTimeLineEdit(QLineEdit):
