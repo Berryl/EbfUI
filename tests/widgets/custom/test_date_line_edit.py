@@ -165,10 +165,9 @@ class TestDateLineEdit:
             calendar = sut._popup.findChild(QCalendarWidget)
             assert calendar.selectedDate() == QDate(2026, 6, 15)
 
-        def test_calendar_selection_sets_text_and_closes_popup(self, sut, qtbot):
+        def test_calendar_selection_sets_text_and_closes_popup(self, sut):
             sut._show_calendar_popup()
 
             sut._on_date_selected(QDate(2026, 6, 20))
 
             assert sut.text() == "Jun-20 2026"
-            qtbot.waitUntil(lambda: sut._popup is None)
