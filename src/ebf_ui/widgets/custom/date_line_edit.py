@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 )
 from ebf_core.date_time.parsers import parse_flex_datetime
 
+from ebf_ui.widgets.custom.date_time_line_edit import _format_date
 from ebf_ui.widgets.custom.utils import show_popup
 
 
@@ -125,7 +126,7 @@ class DateLineEdit(QLineEdit):
             return None
 
     def _set_date(self, d: date) -> None:
-        self.setText(f"{d.strftime('%b')}-{d.day} {d.year}")
+        self.setText(_format_date(d))
 
     def _try_reformat(self) -> None:
         parsed = self._parse_current_text()
