@@ -27,7 +27,8 @@ class DateLineEdit(QLineEdit):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setPlaceholderText("Jun-15 2026  or  t  /  +  /  -  /  Alt+↓")
+        self.setToolTip(
+            "t = today, +/- = adjust day, Alt+↓ = calendar")
         self._popup: QDialog | None = None
 
     # region Public interface

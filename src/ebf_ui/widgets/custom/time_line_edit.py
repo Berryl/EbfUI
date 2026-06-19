@@ -29,7 +29,8 @@ class TimeLineEdit(QLineEdit):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setPlaceholderText("09:30:00 AM  or  n  /  +  /  -  /  Alt+↓")
+        self.setToolTip(
+            "n = now, +/- = adjust seconds, Shift+/- = adjust minutes, Ctrl+/- = adjust hours, Alt+↓ = timepicker")
         self._popup: QDialog | None = None
 
     # region Public interface
