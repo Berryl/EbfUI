@@ -38,6 +38,19 @@ class MoneyLineEdit(QLineEdit):
         self._try_reformat()
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() in (Qt.Key.Key_Up, Qt.Key.Key_Down):
+            current = self._parse_current_text()
+            if current is None:
+                super().keyPressEvent(event)
+                return
+
+            delta = Decimal("1.00") if event.modifiers() & Qt.KeyboardModifier.ShiftModifier else Decimal("0.01")
+            if event.key() == Qt.Key.Key_Down:
+                delta = -delta
+
+            self.set_money(Money.mint(current + delta))
+            self.editingFinished.emit()
+            return
         if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self._try_reformat()
             super().keyPressEvent(event)

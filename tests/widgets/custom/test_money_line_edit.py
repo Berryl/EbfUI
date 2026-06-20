@@ -159,6 +159,41 @@ class TestMoneyLineEdit:
             sut.set_show_explicit_positive_sign(False)
             assert sut.text() == "0.00"
 
+    class TestKeyboardAdjustments:
+
+        @pytest.fixture(autouse=True)
+        def sut_start(self, sut) -> MoneyLineEdit:
+            sut.setText("123.45")
+            return sut
+
+        def test_up_increments_by_one_cent(self, sut_start, qtbot):
+            qtbot.keyClick(sut_start, Qt.Key.Key_Up)
+            assert sut_start.text() == "123.46"
+
+        def test_down_decrements_by_one_cent(self, sut_start, qtbot):
+            qtbot.keyClick(sut_start, Qt.Key.Key_Down)
+            assert sut_start.text() == "123.44"
+
+        def test_shift_up_increments_by_one_dollar(self, sut_start, qtbot):
+            qtbot.keyClick(sut_start, Qt.Key.Key_Up, modifier=Qt.KeyboardModifier.ShiftModifier)
+            assert sut_start.text() == "124.45"
+
+        def test_shift_down_decrements_by_one_dollar(self, sut_start, qtbot):
+            qtbot.keyClick(sut_start, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.ShiftModifier)
+            assert sut_start.text() == "122.45"
+
+        def test_invalid_text_is_left_unchanged(self, sut, qtbot):
+            sut.setText("not money")
+            qtbot.keyClick(sut, Qt.Key.Key_Up)
+
+            assert sut.text() == "not money"
+
+        def test_up_emits_once(self, sut_start, qtbot):
+            spy = QSignalSpy(sut_start.editingFinished)
+            qtbot.keyClick(sut_start, Qt.Key.Key_Up)
+
+            assert _signal_count(spy) == 1
+
     class TestEditingFinished:
 
         def test_enter_emits_once(self, sut, qtbot):
