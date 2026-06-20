@@ -22,7 +22,7 @@ _ALLOWED_OPERATORS = {
 class MoneyLineEdit(QLineEdit):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self._show_sign = False
+        self._show_explicit_positive_sign = False
         self.setToolTip("Enter amount or expression, e.g. 1.25, 100*.05, 15000/100")
 
     def get_money(self) -> Money | None:
@@ -35,8 +35,8 @@ class MoneyLineEdit(QLineEdit):
             return
         self.setText(self._format_money(value))
 
-    def set_show_sign(self, show_sign: bool) -> None:
-        self._show_sign = show_sign
+    def set_show_explicit_positive_sign(self, show_sign: bool) -> None:
+        self._show_explicit_positive_sign = show_sign
         self._try_reformat()
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
@@ -76,7 +76,7 @@ class MoneyLineEdit(QLineEdit):
     def _format_money(self, value: Money) -> str:
         text = value.format(show_currency=False, symbol="", use_separators=True)
 
-        if self._show_sign and value.is_positive:
+        if self._show_explicit_positive_sign and value.is_positive:
             return f"+{text}"
 
         return text
