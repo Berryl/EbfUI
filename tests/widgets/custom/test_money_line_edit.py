@@ -133,7 +133,7 @@ class TestMoneyLineEdit:
 
         def test_positive_money_shows_plus_when_enabled(self, sut, new_amount):
             sut.set_money(new_amount)
-            assert sut.text() == "123.45" # off by default
+            assert sut.text() == "123.45"  # off by default
 
             sut.set_show_explicit_positive_sign(True)
             assert sut.text() == "+123.45"

@@ -1,13 +1,11 @@
-from decimal import Decimal, InvalidOperation
 import ast
 import operator
+from decimal import Decimal, InvalidOperation
 
-from PySide6.QtGui import QFocusEvent, QKeyEvent
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFocusEvent, QKeyEvent
 from PySide6.QtWidgets import QLineEdit, QWidget
-
 from ebf_domain.money.money import Money
-
 
 _ALLOWED_OPERATORS = {
     ast.Add: operator.add,
@@ -80,6 +78,7 @@ class MoneyLineEdit(QLineEdit):
             return f"+{text}"
 
         return text
+
 
 def _evaluate_decimal_expression(text: str) -> Decimal:
     tree = ast.parse(text, mode="eval")
