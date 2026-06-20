@@ -69,6 +69,7 @@ class TestMoneyLineEdit:
         @pytest.mark.parametrize(
             "raw, expected",
             [
+                ("0", "0.00"),
                 ("123", "123.00"),
                 ("123.4", "123.40"),
                 ("123.456", "123.46"),
