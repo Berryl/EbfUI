@@ -9,7 +9,7 @@ class IntLineEdit(QLineEdit):
         parent: QWidget | None = None,
         *,
         step: int = 1,
-        shift_step: int = 100,
+        shift_step: int = 10,
     ) -> None:
         super().__init__(parent)
         self._step = step

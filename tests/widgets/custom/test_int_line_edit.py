@@ -101,11 +101,11 @@ class TestIntLineEdit:
 
         def test_shift_up_increments_by_shift_step(self, sut_start, qtbot):
             qtbot.keyClick(sut_start, Qt.Key.Key_Up, modifier=Qt.KeyboardModifier.ShiftModifier)
-            assert sut_start.text() == "200"
+            assert sut_start.text() == "110"
 
         def test_shift_down_decrements_by_shift_step(self, sut_start, qtbot):
             qtbot.keyClick(sut_start, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.ShiftModifier)
-            assert sut_start.text() == "0"
+            assert sut_start.text() == "90"
 
         def test_invalid_text_is_left_unchanged(self, sut, qtbot):
             sut.setText("not int")
@@ -131,11 +131,11 @@ class TestIntLineEdit:
 
         def test_shift_up_starts_at_shift_step(self, sut, qtbot):
             qtbot.keyClick(sut, Qt.Key.Key_Up, modifier=Qt.KeyboardModifier.ShiftModifier)
-            assert sut.text() == "100"
+            assert sut.text() == "10"
 
         def test_shift_down_starts_at_shift_step(self, sut, qtbot):
             qtbot.keyClick(sut, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.ShiftModifier)
-            assert sut.text() == "-100"
+            assert sut.text() == "-10"
 
     class TestCustomSteps:
 
