@@ -120,6 +120,23 @@ class TestIntLineEdit:
 
             assert _signal_count(spy) == 1
 
+    class TestKeyboardWhenTextIsEmpty:
+        def test_up_starts_at_step(self, sut, qtbot):
+            qtbot.keyClick(sut, Qt.Key.Key_Up)
+            assert sut.text() == "1"
+
+        def test_down_starts_at_negative_step(self, sut, qtbot):
+            qtbot.keyClick(sut, Qt.Key.Key_Down)
+            assert sut.text() == "-1"
+
+        def test_shift_up_starts_at_shift_step(self, sut, qtbot):
+            qtbot.keyClick(sut, Qt.Key.Key_Up, modifier=Qt.KeyboardModifier.ShiftModifier)
+            assert sut.text() == "100"
+
+        def test_shift_down_starts_at_shift_step(self, sut, qtbot):
+            qtbot.keyClick(sut, Qt.Key.Key_Down, modifier=Qt.KeyboardModifier.ShiftModifier)
+            assert sut.text() == "-100"
+
     class TestCustomSteps:
 
         @pytest.fixture

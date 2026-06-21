@@ -35,9 +35,12 @@ class IntLineEdit(QLineEdit):
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() in (Qt.Key.Key_Up, Qt.Key.Key_Down):
             current = self._parse_current_text()
+
             if current is None:
-                super().keyPressEvent(event)
-                return
+                if self.text().strip():
+                    super().keyPressEvent(event)
+                    return
+                current = 0
 
             step = self._shift_step if event.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._step
             if event.key() == Qt.Key.Key_Down:
